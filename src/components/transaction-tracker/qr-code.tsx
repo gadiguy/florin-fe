@@ -38,7 +38,7 @@ export function QRCode({ address }: QRCodeProps) {
   return (
     <div className="flex flex-col items-center justify-center gap-1.5">
       <span className="text-white text-[10px] md:text-xs font-bold">
-        Send your BTC here:
+        Send your LTC here:
       </span>
       <div
         ref={containerRef}

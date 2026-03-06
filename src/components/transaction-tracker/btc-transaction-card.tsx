@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { RefreshCw } from 'lucide-react';
 import EthLogo from '@/assets/eth-logo.png';
-import BtcLogo from '@/assets/bitcoin-logo.png';
+import LtcLogo from '@/assets/litecoin-logo.png';
 import { CheckCircledIcon } from '@radix-ui/react-icons';
 import { getExplorerUrl, truncateAddress } from '@/lib/utils';
 import { InfoField } from './info-field';
@@ -37,12 +37,12 @@ export function BtcTransactionCard({
           )}
         </div>
       );
-    
+
   };
 
   const renderAmount = () => (
     <span className="text-white text-[14px] md:text-[16px] font-medium" data-testid="btc-amount">
-      {isStepThree ? data.amount : `~${data.amount}`} BTC
+      {isStepThree ? data.amount : `~${data.amount}`} LTC
     </span>
   );
 
@@ -67,7 +67,7 @@ export function BtcTransactionCard({
 
   const renderTxid = () => (
     <span className="text-[#FFAA2E] text-[10px] md:text-xs truncate max-w-[180px] md:max-w-[250px]">
-      <img src={BtcLogo} alt="BTC Logo" className="w-4 h-4 inline mr-1" />
+      <img src={LtcLogo} alt="LTC Logo" className="w-4 h-4 inline mr-1" />
       <a href={`${getExplorerUrl(data.txid)}/tx/${data.txid}`} target="_blank" data-testid="btc-txid">
         {data.txid && truncateAddress(data.txid)}
       </a>

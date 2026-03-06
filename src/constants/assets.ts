@@ -1,29 +1,29 @@
-import bitcoinLogo from '@/assets/bitcoin-logo.png';
+import litecoinLogo from '@/assets/litecoin-logo.png';
 import ethLogo from '@/assets/eth-logo.png';
 import xbtcLogo from '@/assets/xbtc-logo.svg';
 
 export const ASSETS = {
-  BITCOIN_LOGO: bitcoinLogo,
+  BITCOIN_LOGO: litecoinLogo,
   ETH_LOGO: ethLogo,
   XBTC_LOGO: xbtcLogo,
   NETWORK_LOGOS: {
-    bitcoin: bitcoinLogo,
+    bitcoin: litecoinLogo,
     ethereum: ethLogo,
   },
   CURRENCY_LOGOS: {
-    btc: bitcoinLogo,
+    btc: litecoinLogo,
     eth: ethLogo,
     xbtc: xbtcLogo,
   },
 };
 
 export const CURRENCY_SYMBOLS = {
-  btc: 'BTC',
+  btc: 'LTC',
   eth: 'ETH',
-  xbtc: 'xBTC',
+  xbtc: 'xLTC',
 };
 
 export const NETWORK_NAMES = {
-  bitcoin: 'Bitcoin',
+  bitcoin: 'Litecoin',
   ethereum: 'Ethereum',
-}; 
+};

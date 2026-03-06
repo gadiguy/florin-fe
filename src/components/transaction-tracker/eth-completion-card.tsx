@@ -1,7 +1,7 @@
 import { Card } from '../ui/card';
 import { CheckCircledIcon } from '@radix-ui/react-icons';
 import { getExplorerUrl, truncateAddress } from '@/lib/utils';
-import bitcoinLogo from '@/assets/bitcoin-logo.png';
+import litecoinLogo from '@/assets/litecoin-logo.png';
 import ethLogo from '@/assets/eth-logo.png';
 import { formatConfirmations } from '@/utils/format';
 
@@ -20,7 +20,7 @@ export function EthCompletionCard({
   confirmations = 20,
   type = 'reservation',
 }: EthCompletionCardProps) {
-  const logoSrc = type === 'position' ? bitcoinLogo : ethLogo;
+  const logoSrc = type === 'position' ? litecoinLogo : ethLogo;
 
   return (
     <Card className="mt-4 w-full bg-[#100D16] rounded-xl p-3 md:p-4 border-none gap-0.5 overflow-hidden">
@@ -34,7 +34,7 @@ export function EthCompletionCard({
         <div className="flex justify-between items-center w-full">
           <span className="text-[#888888] text-[13px]">Amount</span>
           <span className="text-white text-[14px] md:text-[16px] font-medium">
-            {amount} xBTC
+            {amount} xLTC
           </span>
         </div>
       </div>
@@ -51,7 +51,7 @@ export function EthCompletionCard({
         <span className="text-[#FFAA2E] text-[12px] font-medium cursor-pointer flex items-center gap-1">
           <img
             src={logoSrc}
-            alt={type === 'position' ? 'BTC' : 'xBTC'}
+            alt={type === 'position' ? 'LTC' : 'xLTC'}
             className="w-4 h-4 inline"
           />
           <a href={`${getExplorerUrl(reservationTx)}/tx/${reservationTx}`} target="_blank">

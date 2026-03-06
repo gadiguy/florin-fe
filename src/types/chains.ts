@@ -1,4 +1,5 @@
 export enum ChainId {
+  Ethereum = 1,
   MerlinTestnet = 686868,
   EthereumHolesky = 17000,
   Sepolia = 11155111,

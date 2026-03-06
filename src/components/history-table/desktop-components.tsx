@@ -72,11 +72,11 @@ export const DesktopTransactionRow = ({
         />
       </TableCell>
       <TableCell className="text-end pr-2 text-xs border-t border-b border-[#333845] bg-[#1D1F25] py-3 px-2 whitespace-nowrap" data-testid="requested-amount">
-        {tx.amount} {tx.type === 'position' ? 'xBTC' : 'BTC'}
+        {tx.amount} {tx.type === 'position' ? 'xLTC' : 'BTC'}
       </TableCell>
       <TableCell className="text-end pr-2 text-xs border-t border-b border-[#333845] bg-[#1D1F25] py-3 px-2 whitespace-nowrap" data-testid="received-amount">
         {formatReceivedAmount(tx.amount || tx?.originalAmount || '0', data?.minAmount)}{' '}
-        {tx.type === 'position' ? 'xBTC' : 'BTC'}
+        {tx.type === 'position' ? 'xLTC' : 'BTC'}
       </TableCell>
       <TableCell className="text-[#FFAA2E] pl-2 text-xs border-t border-b border-[#333845] bg-[#1D1F25] py-3 px-2 whitespace-nowrap cursor-pointer">
         <Txhash

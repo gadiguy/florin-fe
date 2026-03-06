@@ -60,7 +60,7 @@ export const AmountInputHeader = ({
               currency === 'xbtc' ? 'opacity-50 text-gray-400' : ''
             }`}
           >
-            {formattedAmount} xBTC
+            {formattedAmount} xLTC
           </span>
         </div>
       )}

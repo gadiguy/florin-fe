@@ -90,7 +90,7 @@ export const MobileTransactionItem = ({
           <div className="grid grid-cols-2 items-center">
             <span className="text-sm">Requested amount</span>
             <span className="text-sm text-right">
-              {tx.amount} {tx.type === 'position' ? 'BTC' : 'xBTC'}
+              {tx.amount} {tx.type === 'position' ? 'BTC' : 'xLTC'}
             </span>
           </div>
 
@@ -98,7 +98,7 @@ export const MobileTransactionItem = ({
             <span className="text-sm">Received amount</span>
             <span className="text-sm text-right">
               {formatReceivedAmount(tx.receivedAmount, data?.minAmount)}{' '}
-              {tx.type === 'position' ? 'BTC' : 'xBTC'}
+              {tx.type === 'position' ? 'BTC' : 'xLTC'}
             </span>
           </div>
 

@@ -25,13 +25,13 @@ export function FeeCard({ toCurrency, isAnimating, amount, gasFee }: FeeCardProp
           <div className="flex items-center gap-1 text-text-secondary text-[13px]">
             You'll receive
             <InfoTooltip
-              message={`You'll receive the ${toCurrency === 'btc' ? 'BTC' : 'xBTC'} you sent, minus the network fee.`}
+              message={`You'll receive the ${toCurrency === 'btc' ? 'BTC' : 'xLTC'} you sent, minus the network fee.`}
               position="top"
               align="center"
             />
           </div>
           <div className="text-white text-right text-[13px]">
-            {receiveAmount} {toCurrency === 'btc' ? 'BTC' : 'xBTC'}
+            {receiveAmount} {toCurrency === 'btc' ? 'BTC' : 'xLTC'}
           </div>
         </div>
         <div className="flex justify-between items-center">

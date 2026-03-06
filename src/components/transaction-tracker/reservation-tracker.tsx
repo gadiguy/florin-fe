@@ -85,9 +85,9 @@ export function ReservationTracker({
 
   const btcTransactionDetected =
     status !== ReservationStatus.Expired &&
-    !!reservation?.targetBlockHash &&
-    reservation.targetBlockNumber &&
-    reservation.targetBlockNumber > 0;
+    !!reservation?.originTxhash &&
+    reservation.originBlockNumber &&
+    reservation.originBlockNumber > 0;
 
   return (
     <BaseTransactionTracker
@@ -150,8 +150,8 @@ export function ReservationTracker({
 
           {/* Step 3 - BTC Transaction Detected */}
           <TransactionStep
-            title="BTC transaction detected"
-            description="Your bitcoin transfer was mined."
+            title="LTC transaction detected"
+            description="Your Litecoin transfer was mined."
             status={btcTransactionDetected ? 'completed' : 'pending'}
             completed={!!btcTransactionDetected}
           >
@@ -172,7 +172,7 @@ export function ReservationTracker({
           {/* Step 4 - Transaction Complete */}
           <TransactionStep
             title="Bridging complete"
-            description="Funds (xBTC) are in your wallet now."
+            description="Funds (xLTC) are in your wallet now."
             status={bridgingCompleted ? 'completed' : 'pending'}
             isLastStep={true}
             completed={bridgingCompleted}

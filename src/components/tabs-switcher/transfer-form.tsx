@@ -119,7 +119,7 @@ export function TransferForm({
         >
           Ethereum sending address
           <InfoTooltip
-            message="The sending amount is calculated in BTC. Ethereum token X, Y, Z can be used for transfer"
+            message="The sending amount is calculated in LTC. Ethereum token X, Y, Z can be used for transfer"
             position="top"
           />
         </Label>
@@ -143,20 +143,20 @@ export function TransferForm({
             htmlFor="bitcoin-address"
             className="text-xs text-text-secondary font-bold flex flex-row gap-1"
           >
-            Bitcoin receiving address
+            Litecoin receiving address
             <InfoTooltip
-              message="Enter the P2WPKH Bitcoin address where you want to receive your BTC."
+              message="Enter the P2WPKH Litecoin address where you want to receive your LTC."
               position="top"
             />
           </Label>
           <Input
             id="bitcoin-address"
-            placeholder="Paste your Bitcoin receiving address"
+            placeholder="Paste your Litecoin receiving address"
             value={bitcoinAddress || ''}
             onChange={(e) => setBitcoinAddress(e.target.value as Address)}
             errorMessage={
               bitcoinAddress && !bitcoinAddressValid
-                ? 'Invalid Bitcoin address'
+                ? 'Invalid Litecoin address'
                 : undefined
             }
             className={cn(

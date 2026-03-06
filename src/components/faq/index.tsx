@@ -9,18 +9,18 @@ export function FaqContainer() {
             {
               question: 'What is Grail?',
               answer:
-                'Grail is a technology for trustlessly bridging bitcoin to other blockchains using zero-knowledge cryptography. BOS verified the first ZK proof on Bitcoin in July 2024, finally demonstrating that this long-awaited, key technical unlock was possible for the most popular chain.',
+                'Grail is a technology for trustlessly bridging Litecoin to other blockchains using zero-knowledge cryptography. BOS verified the first ZK proof on Bitcoin in July 2024, finally demonstrating that this long-awaited, key technical unlock was possible for the most popular chain.',
             },
             {
-              question: 'What blockchains can I bridge my BTC into with Grail?',
+              question: 'What blockchains can I bridge my LTC into with Grail?',
               answer:
-                'Currently, Grail is only available on Ethereum. We are working on adding support for more chains in the future.',
+                'Currently, Grail is only available on LitVM. We are working on adding support for more chains in the future.',
             },
             {
               question:
-                'Bitcoin bridges already exist. What makes Grail special?',
+                'Litecoin bridges already exist. What makes Grail special?',
               answer:
-                'Bitcoin bridges already exist. What makes Grail special is that it is the first to use zero-knowledge cryptography to prove that a user has a valid bitcoin transaction, without revealing the transaction details. This allows users to bridge their BTC to other chains without revealing their private keys.',
+                'Litecoin bridges already exist. What makes Grail special is that it is the first to use zero-knowledge cryptography to prove that a user has a valid Litecoin transaction, without revealing the transaction details. This allows users to bridge their LTC to other chains without revealing their private keys.',
             },
           ]}
         />

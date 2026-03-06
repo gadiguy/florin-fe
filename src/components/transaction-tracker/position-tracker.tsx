@@ -100,7 +100,7 @@ export function PositionTracker({
           {/* Step 2 - Bridging complete */}
           <TransactionStep
             title="Bridging complete"
-            description="Funds (BTC) are in your wallet now"
+            description="Funds (LTC) are in your wallet now"
             status={isPositionCompleted ? 'completed' : 'pending'}
             completed={isPositionCompleted}
             isLastStep={true}
