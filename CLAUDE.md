@@ -10,3 +10,7 @@ sudo -u gadiguy bash
 ```
 
 App runs as `gadiguy`, project at `~/florin-fe-be/`, logs at `~/florin-fe-be/data/app.log`.
+
+## Development Rules
+
+Always run `npm run build` and confirm it passes before telling the user a task is done.

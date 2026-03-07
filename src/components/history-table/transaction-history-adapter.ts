@@ -7,7 +7,7 @@ import {
 import { formatUnits } from 'viem';
 
 export type TransactionType = 'position' | 'reservation';
-export type ChainType = 'bitcoin' | 'ethereum';
+export type ChainType = 'Litecoin' | 'Ethereum';
 
 export interface TransactionNormalized {
   type: TransactionType;
@@ -88,8 +88,8 @@ export function transactionHistoryAdapter(
   return {
     ...item,
     type: type,
-    fromChain: !item.reservationId ? 'ethereum' : 'bitcoin',
-    toChain: !item.reservationId ? 'bitcoin' : 'ethereum',
+    fromChain: !item.reservationId ? 'Ethereum' : 'Litecoin',
+    toChain: !item.reservationId ? 'Litecoin' : 'Ethereum',
     positionId: item.positionId,
     reservationId: item.reservationId,
     chainId: item.registrationChain,
