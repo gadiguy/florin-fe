@@ -34,7 +34,7 @@ export const sepolia = createChain(
   ChainId.Sepolia,
   'Sepolia',
   'tETH',
-  'https://sepolia.gateway.tenderly.co',
+  'https://ethereum-sepolia-rpc.publicnode.com',
   'https://sepolia.etherscan.io',
   'https://api-sepolia.etherscan.io/api'
 );
