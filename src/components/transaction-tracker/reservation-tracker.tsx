@@ -64,7 +64,7 @@ export function ReservationTracker({
   });
 
   const status = RESERVATION_STATUS_MAP[evmReservation?.status || 0];
-  const bridgingCompleted = status === ReservationStatus.Settled;
+  const bridgingCompleted = status === ReservationStatus.Settled || !!reservation?.targetTxhash;
   const btcReadyToSend =
     Number(fiatAmount) < env.VITE_EVM_CONFIRMATIONS_USD_AMOUNT ||
     confirmations >= maxConfirmations;
