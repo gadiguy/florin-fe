@@ -152,7 +152,7 @@ export function ReservationTracker({
           {/* Step 3 - BTC Transaction Detected */}
           <TransactionStep
             title="LTC transaction detected"
-            description="We need 6 confirmations (around 15 minutes) to make sure the transaction is final."
+            description="We need 1 confirmation to make sure the transaction is final."
             status={btcTransactionDetected ? 'completed' : 'pending'}
             completed={!!btcTransactionDetected}
           >
