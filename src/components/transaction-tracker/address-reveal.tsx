@@ -8,12 +8,12 @@ import { getExplorerUrl, truncateAddress } from '@/lib/utils';
 interface AddressRevealProps {
   amount: string;
   address: string;
-  timeLeft: {
+  timeLeft?: {
     hours: number;
     minutes: number;
     seconds: number;
   };
-  progress: number;
+  progress?: number;
   isReadyToSend?: boolean;
 }
 
@@ -37,8 +37,6 @@ function useMediaQuery(query: string) {
 export function AddressReveal({
   amount,
   address,
-  timeLeft,
-  progress,
   isReadyToSend,
 }: AddressRevealProps) {
   const [showAddress, setShowAddress] = useState(isReadyToSend || false);
