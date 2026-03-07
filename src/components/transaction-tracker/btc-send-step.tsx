@@ -61,8 +61,8 @@ export function BtcSendStep({
   const descriptionMessage = isSent
     ? 'You initiated transaction in your wallet to send LTC.'
     : parseFloat(fiatAmount) > env.VITE_EVM_CONFIRMATIONS_USD_AMOUNT
-      ? `Your Litecoin transaction has been detected. You need to send LTC from your Litecoin wallet to a specified address. If your transaction is ${env.VITE_EVM_CONFIRMATIONS_USD_AMOUNT}+ in LTC, you must wait for at least ${env.VITE_EVM_CONFIRMATIONS} confirmations before sending LTC. Make sure to send LTC within ${env.VITE_EXPIRATION_HOURS} hours.`
-      : `Your Litecoin transaction has been detected. You can send LTC from your Litecoin wallet to a specified address. Make sure to send LTC within ${env.VITE_EXPIRATION_HOURS} hours.`;
+      ? `You need to send LTC from your Litecoin wallet to a specified address. If your transaction is ${env.VITE_EVM_CONFIRMATIONS_USD_AMOUNT}+ in LTC, you must wait for at least ${env.VITE_EVM_CONFIRMATIONS} confirmations before sending LTC. Make sure to send LTC within ${env.VITE_EXPIRATION_HOURS} hours.`
+      : `You can send LTC from your Litecoin wallet to a specified address. Make sure to send LTC within ${env.VITE_EXPIRATION_HOURS} hours.`;
 
   const stepStatus =
     reservation.state !== ReservationStatus.Expired &&
