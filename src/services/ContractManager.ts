@@ -15,6 +15,7 @@ import { CMError, ContractError, parseContractError } from '@/lib/errors';
 import { TransactionResponse } from '@/types';
 import { Address } from 'viem';
 import { wagmiConfig } from '@/config/wagmi';
+import { supportedChains } from '@/config/evm-chains';
 import { env } from '@/config/env';
 
 export class ContractManager {
@@ -82,9 +83,11 @@ export class ContractManager {
         throw new Error('No chain ID available in connector');
       }
 
+      const knownChain = supportedChains.find((c) => c.id === connectorClient.chain.id);
+      const rpcUrl = knownChain?.rpcUrls.default.http[0] || env.VITE_RPC_URL;
       instance.publicClient = createPublicClient({
         chain: connectorClient.chain,
-        transport: http(env.VITE_RPC_URL),
+        transport: http(rpcUrl),
       });
 
       if (connectorClient?.account) {
