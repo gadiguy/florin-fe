@@ -26,9 +26,9 @@ export function TransactionStep({
         <div
           className={`absolute left-[14px] top-[30px] w-[3px] h-[calc(100%)] ${
             completed && isStepOne
-              ? 'bg-gradient-to-b from-orange-light to-orange'
+              ? 'bg-gradient-to-b from-[#4CAF50] to-[#388E3C]'
               : completed
-                ? 'bg-orange'
+                ? 'bg-[#4CAF50]'
                 : 'bg-[#3A3740]'
           }`}
         ></div>
