@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { CopyIcon } from '@radix-ui/react-icons';
-import { CircleProgress } from './circle-progress';
 import { EyeIcon } from './eye-icon';
 import { QRCode } from './qr-code';
 import { getExplorerUrl, truncateAddress } from '@/lib/utils';
@@ -53,9 +52,6 @@ export function AddressReveal({
     }
   }, [isReadyToSend]);
 
-  // Format time as 00:00:00
-  const formattedTime = `${String(timeLeft.hours).padStart(2, '0')}:${String(timeLeft.minutes).padStart(2, '0')}:${String(timeLeft.seconds).padStart(2, '0')}`;
-
   // Handle copy address to clipboard
   const copyToClipboard = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -77,7 +73,7 @@ export function AddressReveal({
       className={`w-full p-3 cursor-pointer border-none bg-[#2A2730] flex flex-col items-center justify-center gap-2 ${
         !showAddress
           ? 'h-[100px] md:h-[116px] justify-center'
-          : 'h-[330px] md:h-[360px]'
+          : 'h-[270px] md:h-[290px]'
       }`}
       onClick={() => {
         if (isReadyToSend) return;
@@ -97,21 +93,6 @@ export function AddressReveal({
           </>
         ) : (
           <>
-            <div className="max-h-full w-full">
-              <div className="flex gap-2 md:gap-4 items-center justify-center mb-3 md:mb-4">
-                <div className="relative w-[35px] h-[35px] md:w-[38px] md:h-[38px]">
-                  <CircleProgress progress={progress} />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-white text-[11px] md:text-[13px] mb-1">
-                    Reservation expires in
-                  </span>
-                  <span className="text-[#4CAF50] text-xl md:text-2xl font-medium text-center">
-                    {formattedTime}
-                  </span>
-                </div>
-              </div>
-            </div>
             <div className="flex justify-between items-center w-full">
               <span className="text-[#888888] text-[11px] md:text-[13px]">
                 Amount

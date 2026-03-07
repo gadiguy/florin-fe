@@ -44,6 +44,7 @@ export function ReservationTracker({
     });
 
   const amount = formatUnits(evmReservation?.tokenAmount || 0n, 8);
+  const xltcAmount = formatUnits(evmReservation?.tokenAmount || 0n, 18);
 
   const fiatAmount = useMemo(() => {
     if (!amount || !bitcoinPrice?.bitcoin?.usd) return '0';
@@ -151,7 +152,7 @@ export function ReservationTracker({
           {/* Step 3 - BTC Transaction Detected */}
           <TransactionStep
             title="LTC transaction detected"
-            description="Your Litecoin transfer was mined."
+            description="Your Litecoin transfer was mined. We need 6 confirmations (around 15 minutes) to make sure the transaction is final."
             status={btcTransactionDetected ? 'completed' : 'pending'}
             completed={!!btcTransactionDetected}
           >
@@ -179,7 +180,7 @@ export function ReservationTracker({
           >
             {bridgingCompleted && (
               <EthCompletionCard
-                amount={amount}
+                amount={xltcAmount}
                 confirmations={targetConfirmations}
                 recipientAddress={evmReservation.bitcoinAddress || ''}
                 reservationTx={
