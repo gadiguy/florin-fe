@@ -7,7 +7,7 @@ import { Button } from '../ui/button';
 import { isValidBitcoinAddress } from '@/lib/utils';
 import { Network, Currency } from './types';
 import { useChainId } from 'wagmi';
-import { Address, parseEther, parseUnits } from 'viem';
+import { Address, parseEther } from 'viem';
 import { useExchange } from '@/hooks/useExchange';
 import { Position, Reservation } from '@/types';
 import { useMaxMinBtc } from '@/hooks/queries/useMaxMinBtc';
@@ -137,7 +137,7 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
 
   const handleBridgeFunds = async () => {
     const normalizedAmount = fromAmount.replace(',', '.');
-    const parsedAmount = parseUnits(normalizedAmount, 8);
+    const parsedAmount = parseEther(normalizedAmount);
     let transaction: Position | Reservation | undefined;
     if (fromNetwork === 'bitcoin') {
       transaction = await reservePosition({
