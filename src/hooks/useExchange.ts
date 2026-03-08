@@ -110,6 +110,7 @@ export const useExchange = () => {
       const domain = {
         name: tokenName,
         version: '1',
+        chainId,
         verifyingContract: tokenAddress,
       };
       const types = {
