@@ -93,6 +93,16 @@ export const useExchange = () => {
         chainId as keyof typeof CONTRACTS_ADDRESS
       ].erc20BitSnark as Address;
 
+      const balance = await contractManager.readContract(
+        'ERC20BitSnark',
+        'balanceOf',
+        [owner],
+        tokenAddress
+      ) as unknown as bigint;
+      if (balance < tokenAmount) {
+        throw new Error('Insufficient xLTC balance.');
+      }
+
       const tokenName = await contractManager.readContract(
         'ERC20BitSnark',
         'name',
@@ -100,7 +110,6 @@ export const useExchange = () => {
         tokenAddress
       );
 
-      
       const nonce = await contractManager.readContract(
         'ERC20BitSnark',
         'nonces',

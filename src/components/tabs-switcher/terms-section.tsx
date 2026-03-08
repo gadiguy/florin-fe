@@ -83,7 +83,7 @@ export function TermsSection({
         >
           <ExclamationTriangleIcon className="text-orange w-[30px] h-[30px]" />
           <span className="text-xs text-white">
-            Please note, in the next step you will be asked to send your BTC to
+            Please note, in the next step you will be asked to send your LTC to
             a specified address
           </span>
         </Card>
