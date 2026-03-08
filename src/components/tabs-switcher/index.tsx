@@ -33,6 +33,7 @@ export function TabSwitcherContainer() {
         className="gap-2.5 bg-[#100D16] border-none"
       />
       <TransactionTrackerDialog
+        key={trackerData.transactionId}
         open={trackerData.open}
         onOpenChange={(open) => {
           setTrackerData((prev) => ({ ...prev, open }));
@@ -45,6 +46,7 @@ export function TabSwitcherContainer() {
         {activeTab === 0 ? (
           <TransferTab 
             onTransactionCreated={(type, id, txHash) => {
+              console.log('[onTransactionCreated] type:', type, 'id:', id, 'txHash:', txHash);
               setTrackerData({
                 type,
                 open: true,
