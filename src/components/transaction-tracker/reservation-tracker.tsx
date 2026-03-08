@@ -85,10 +85,12 @@ export function ReservationTracker({
     : 'max-h-[90vh]';
 
   const btcTransactionDetected =
-    status !== ReservationStatus.Expired &&
-    !!reservation?.originTxhash &&
-    reservation.originBlockNumber &&
-    reservation.originBlockNumber > 0;
+    bridgingCompleted || (
+      status !== ReservationStatus.Expired &&
+      !!reservation?.originTxhash &&
+      reservation.originBlockNumber &&
+      reservation.originBlockNumber > 0
+    );
 
   return (
     <BaseTransactionTracker
