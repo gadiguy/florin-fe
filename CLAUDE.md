@@ -16,3 +16,5 @@ App runs as `gadiguy`, project at `~/florin-fe-be/`, logs at `~/florin-fe-be/dat
 Always run `npm run build` and confirm it passes before telling the user a task is done.
 
 **Scope:** You are only responsible for the `florin-fe` repository. Never make changes to any other repository (florin-mm, florin-fe-be, etc.).
+
+**Environment variables:** Production env variables are managed in Netlify, not in `.env` files.
