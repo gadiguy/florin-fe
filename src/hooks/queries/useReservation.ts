@@ -14,6 +14,5 @@ export function useReservation(
     queryFn: () => FlorinApiService.getReservationById(reservationId),
     enabled: !!reservationId,
     refetchInterval: refetchInterval || undefined,
-    placeholderData: (previousData) => previousData,
   });
 }

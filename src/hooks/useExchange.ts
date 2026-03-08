@@ -231,7 +231,7 @@ export const useExchange = () => {
       };
 
       const reservationId = receipt?.logs
-        ? receipt?.logs[0].args.reservationId
+        ? receipt.logs.find((l: { args?: { reservationId?: string } }) => l.args?.reservationId)?.args?.reservationId
         : '';
       if (!reservationId) {
         throw new Error('Reservation ID not found');
