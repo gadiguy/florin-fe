@@ -73,7 +73,7 @@ export function TransferForm({
           maxBtc={maxBtc}
           minBtc={minBtc}
           bitcoinPrice={bitcoinPrice?.bitcoin.usd || 0}
-          readOnly={isFromXbtcToBtc}
+          readOnly={false}
         />
       </div>
       <div
@@ -99,7 +99,7 @@ export function TransferForm({
           amount={toAmount}
           xbtcAmount={xbtcAmount}
           onAmountChange={handleToAmountChange}
-          readOnly={!isFromXbtcToBtc}
+          readOnly={true}
           isFromXbtcToBtc={isFromXbtcToBtc}
           maxBtc={maxBtc}
           minBtc={minBtc}
