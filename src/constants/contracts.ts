@@ -5,7 +5,7 @@ export const CONTRACTS_ADDRESS = {
     ammExchange: '0x483b819A38f2Aa75C1e42e88Cbc5e32A09dEd48C',
     marketMakerProxy: '0xb7fa6f0F519c94D9FE40e8dB8C8B8609487d2825',
     florinForwarder: '0xa9f24c03A309bF72086CF7496771eFa02C3b99D9',
-    erc20BitSnark: '0xE7343ec1D7Cb8388a518B82BD6bfaebB343893c9',
+    erc20BitSnark: '0x087aaAc1E05DbB76b9A9E7a837F9e6C7ebDBfA23',
     contractRegistry: '0x204652c13363cc43a7bC87B23b13870A0DB20a03',
   },
   31337: {
