@@ -163,7 +163,7 @@ export function ReservationTracker({
                 data={{
                   amount: amount,
                   txid: reservation?.originTxhash,
-                  confirmations: btcConfirmations,
+                  confirmations: bridgingCompleted ? env.VITE_BTC_CONFIRMATIONS : btcConfirmations,
                   fiatAmount: fiatAmount,
                   maxConfirmations: env.VITE_BTC_CONFIRMATIONS,
                 }}
