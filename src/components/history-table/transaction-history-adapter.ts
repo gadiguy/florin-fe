@@ -83,7 +83,7 @@ export function transactionHistoryAdapter(
 
     const state = type === 'position'
     ? POSITION_STATUS_MAP[item?.targetBlockHash ? 3 : 1]
-    : RESERVATION_STATUS_MAP[item.state || 1]
+    : item.targetTxhash ? ReservationStatus.Settled : RESERVATION_STATUS_MAP[item.state || 1]
 
   return {
     ...item,
