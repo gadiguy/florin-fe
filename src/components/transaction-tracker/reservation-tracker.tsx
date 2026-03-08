@@ -43,7 +43,7 @@ export function ReservationTracker({
       isActive: shouldPoll,
     });
 
-  const amount = formatUnits(evmReservation?.tokenAmount || 0n, 8);
+  const amount = formatUnits(evmReservation?.tokenAmount || 0n, 18);
   const xltcAmount = formatUnits(evmReservation?.tokenAmount || 0n, 18);
 
   const fiatAmount = useMemo(() => {
