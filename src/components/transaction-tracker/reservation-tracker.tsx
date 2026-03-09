@@ -4,7 +4,7 @@ import { BtcTransactionCard } from './btc-transaction-card';
 import { BtcSendStep } from './btc-send-step';
 import { EthCompletionCard } from './eth-completion-card';
 import { BaseTransactionTracker } from './base-transaction-tracker';
-import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
+import { useLitecoinPrice } from '@/hooks/useLitecoinPrice';
 import { useMemo, useState, useEffect } from 'react';
 import { useTxConfirmations } from '@/hooks/useTxConfirmations';
 import { useEVMReservationPolling } from '@/hooks/useEVMReservationPolling';
@@ -32,7 +32,7 @@ export function ReservationTracker({
   const { data } = useReservation(id, {
     refetchInterval: shouldPoll ? 5000 : undefined,
   });
-  const { data: bitcoinPrice } = useBitcoinPrice();
+  const { data: litecoinPrice } = useLitecoinPrice();
   const chainId = useChainId();
   const reservation = data?.data;
 
@@ -47,10 +47,10 @@ export function ReservationTracker({
   const xltcAmount = formatUnits(evmReservation?.tokenAmount || 0n, 18);
 
   const fiatAmount = useMemo(() => {
-    if (!amount || !bitcoinPrice?.bitcoin?.usd) return '0';
-    const usdValue = Number(amount) * bitcoinPrice.bitcoin.usd;
+    if (!amount || !litecoinPrice?.litecoin?.usd) return '0';
+    const usdValue = Number(amount) * litecoinPrice.litecoin.usd;
     return usdValue.toFixed(2);
-  }, [amount, bitcoinPrice?.bitcoin?.usd]);
+  }, [amount, litecoinPrice?.litecoin?.usd]);
 
   const maxConfirmations = Number(env.VITE_EVM_CONFIRMATIONS);
 
