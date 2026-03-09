@@ -74,6 +74,7 @@ export function PositionTracker({
       onOpenChange={onOpenChange}
       isLoading={isLoading}
       error={error}
+      positionId={id}
     >
       {evmPosition && (
         <>

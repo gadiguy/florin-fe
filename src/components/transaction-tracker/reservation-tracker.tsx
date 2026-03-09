@@ -99,6 +99,8 @@ export function ReservationTracker({
       isLoading={false}
       error={isEVMReservationError}
       maxHeight={maxHeightClass}
+      positionId={reservation?.positionId}
+      reservationId={id}
     >
       {evmReservation && (
         <>
