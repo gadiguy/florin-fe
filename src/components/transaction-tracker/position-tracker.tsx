@@ -40,7 +40,7 @@ export function PositionTracker({
     isActive: shouldPoll,
   });
 
-  const amount = formatUnits(evmPosition?.originalAmount || 0n, 8);
+  const amount = formatUnits(evmPosition?.originalAmount || 0n, 18);
   const fiatAmount = useMemo(() => {
     if (!evmPosition?.originalAmount || !bitcoinPrice?.bitcoin?.usd) return '0';
     const usdValue = Number(amount) * bitcoinPrice.bitcoin.usd;
