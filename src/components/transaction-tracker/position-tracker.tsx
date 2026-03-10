@@ -65,7 +65,11 @@ export function PositionTracker({
 
   useEffect(() => {
     if (isPositionCompleted) {
-      queryClient.invalidateQueries({ queryKey: ['transactions', 'history', address] });
+      queryClient.setQueryData(
+        ['transactions', 'history', address],
+        (old: { positionId: string; state?: number }[] | undefined) =>
+          old?.map((item) => item.positionId === id ? { ...item, state: 3 } : item)
+      );
     }
   }, [isPositionCompleted]);
 

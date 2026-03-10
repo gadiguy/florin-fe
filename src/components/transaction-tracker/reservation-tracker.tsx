@@ -86,7 +86,11 @@ export function ReservationTracker({
 
   useEffect(() => {
     if (bridgingCompleted) {
-      queryClient.invalidateQueries({ queryKey: ['transactions', 'history', address] });
+      queryClient.setQueryData(
+        ['transactions', 'history', address],
+        (old: { reservationId?: string; state?: number }[] | undefined) =>
+          old?.map((item) => item.reservationId === id ? { ...item, state: 4 } : item)
+      );
     }
   }, [bridgingCompleted]);
 
