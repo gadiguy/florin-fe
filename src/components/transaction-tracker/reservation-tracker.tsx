@@ -8,7 +8,8 @@ import { useLitecoinPrice } from '@/hooks/useLitecoinPrice';
 import { useMemo, useState, useEffect } from 'react';
 import { useTxConfirmations } from '@/hooks/useTxConfirmations';
 import { useEVMReservationPolling } from '@/hooks/useEVMReservationPolling';
-import { useChainId } from 'wagmi';
+import { useChainId, useAccount } from 'wagmi';
+import { useQueryClient } from '@tanstack/react-query';
 import { Address, formatUnits } from 'viem';
 import { useReservation } from '@/hooks/queries/useReservation';
 import { RESERVATION_STATUS_MAP } from '../history-table/transaction-history-adapter';
@@ -75,10 +76,19 @@ export function ReservationTracker({
     transactionHash: reservation?.targetTxhash,
   });
 
+  const queryClient = useQueryClient();
+  const { address } = useAccount();
+
   useEffect(() => {
     const should = open && !bridgingCompleted;
     setShouldPoll(should);
   }, [bridgingCompleted, open]);
+
+  useEffect(() => {
+    if (bridgingCompleted) {
+      queryClient.invalidateQueries({ queryKey: ['transactions', 'history', address] });
+    }
+  }, [bridgingCompleted]);
 
   const maxHeightClass = !bridgingCompleted
     ? 'max-h-[90vh] md:h-[813px]'

@@ -11,6 +11,6 @@ export function useTransactionHistory(ownerAddress: string | undefined) {
     queryKey: ['transactions', 'history', ownerAddress],
     queryFn: () => FlorinApiService.getTransactionHistory(ownerAddress),
     enabled: !!ownerAddress,
-    staleTime: 1000 * 60 * 1, // 1 minute
+    staleTime: 1000 * 10, // 10 seconds
   });
 } 

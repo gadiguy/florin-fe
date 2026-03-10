@@ -5,7 +5,8 @@ import { BaseTransactionTracker } from './base-transaction-tracker';
 import { usePosition } from '@/hooks/queries/usePosition';
 import { useTxConfirmations } from '@/hooks/useTxConfirmations';
 import { useEVMPositionPolling } from '@/hooks/useEVMPositionPolling';
-import { useChainId } from 'wagmi';
+import { useChainId, useAccount } from 'wagmi';
+import { useQueryClient } from '@tanstack/react-query';
 import { formatUnits } from 'viem';
 import { useMemo, useState, useEffect } from 'react';
 import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
@@ -54,11 +55,19 @@ export function PositionTracker({
 
   const status = POSITION_STATUS_MAP[evmPosition?.status || 1];
   const isPositionCompleted = status === PositionStatus.Closed;
+  const queryClient = useQueryClient();
+  const { address } = useAccount();
 
   useEffect(() => {
     const should = open && !isPositionCompleted;
     setShouldPoll(should);
   }, [isPositionCompleted, open]);
+
+  useEffect(() => {
+    if (isPositionCompleted) {
+      queryClient.invalidateQueries({ queryKey: ['transactions', 'history', address] });
+    }
+  }, [isPositionCompleted]);
 
   
   const targetConfirmations = useBtcBlockConfirmations({
