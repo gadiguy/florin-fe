@@ -13,7 +13,6 @@ import { Address, formatEther } from 'viem';
 import { CONTRACTS_ADDRESS } from '@/constants/contracts';
 import { ContractManager } from '@/services/ContractManager';
 import { bech32ToBytes32, bytes32ToBech32Taproot } from '@/lib/utils';
-import { DEFAULT_POSITION_ID } from '@/constants';
 import { AMMEXCHANGE_ABI } from '@/constants/abis';
 
 export const useExchange = () => {
@@ -50,7 +49,7 @@ export const useExchange = () => {
         address: contractAddress,
         abi: AMMEXCHANGE_ABI,
         functionName: 'reservePosition',
-        args: [DEFAULT_POSITION_ID, owner, tokenAmount],
+        args: [CONTRACTS_ADDRESS[chainId as keyof typeof CONTRACTS_ADDRESS].defaultPositionId, owner, tokenAmount],
         account: owner,
         value: 0n,
       });
@@ -216,7 +215,7 @@ export const useExchange = () => {
         chainId as keyof typeof CONTRACTS_ADDRESS
       ].erc20BitSnark as Address;
 
-      const positionId = DEFAULT_POSITION_ID;
+      const positionId = CONTRACTS_ADDRESS[chainId as keyof typeof CONTRACTS_ADDRESS].defaultPositionId;
       const contractAddress = CONTRACTS_ADDRESS[
         chainId as keyof typeof CONTRACTS_ADDRESS
       ].ammExchange as Address;

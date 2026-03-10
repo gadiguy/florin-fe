@@ -29,9 +29,6 @@ const envSchema = z.object({
   VITE_BTC_CONFIRMATIONS: z.string().transform((val) => Number(val)).refine((val) => val > 0, {
     message: 'VITE_BTC_CONFIRMATIONS must be greater than 0',
   }),
-  VITE_DEFAULT_POSITION_ID: z.string().min(1, {
-    message: 'VITE_DEFAULT_POSITION_ID is required',
-  }),
 });
 
 const parsed = envSchema.safeParse(import.meta.env);
