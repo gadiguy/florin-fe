@@ -20,7 +20,7 @@ export const ASSETS = {
 export const CURRENCY_SYMBOLS = {
   btc: 'LTC',
   eth: 'ETH',
-  xbtc: 'xLTC',
+  xbtc: 'zkLTC',
 };
 
 export const NETWORK_NAMES = {

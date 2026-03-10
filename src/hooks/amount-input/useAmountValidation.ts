@@ -19,7 +19,7 @@ export const useAmountValidation = ({
     const currencySymbol = CURRENCY_SYMBOLS[currency];
 
     if (isFromXbtcToBtc && xbtcAmount && numValue > Number(xbtcAmount)) {
-      return { error: `Maximum value: ${xbtcAmount} xLTC`, validValue: value };
+      return { error: `Maximum value: ${xbtcAmount} zkLTC`, validValue: value };
     }
     if (maxBtc && numValue > Number(maxBtc)) {
       return { error: `Maximum value: ${maxBtc} ${currencySymbol}`, validValue: value };

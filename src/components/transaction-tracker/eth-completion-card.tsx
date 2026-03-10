@@ -34,7 +34,7 @@ export function EthCompletionCard({
         <div className="flex justify-between items-center w-full">
           <span className="text-[#888888] text-[13px]">Amount</span>
           <span className="text-white text-[14px] md:text-[16px] font-medium">
-            {amount} xLTC
+            {amount} zkLTC
           </span>
         </div>
       </div>
@@ -51,7 +51,7 @@ export function EthCompletionCard({
         <span className="text-[#FFAA2E] text-[12px] font-medium cursor-pointer flex items-center gap-1">
           <img
             src={logoSrc}
-            alt={type === 'position' ? 'LTC' : 'xLTC'}
+            alt={type === 'position' ? 'LTC' : 'zkLTC'}
             className="w-4 h-4 inline"
           />
           <a href={`${getExplorerUrl(reservationTx)}/tx/${reservationTx}`} target="_blank">

@@ -15,6 +15,21 @@ import { ContractManager } from '@/services/ContractManager';
 import { bech32ToBytes32, bytes32ToBech32Taproot } from '@/lib/utils';
 import { AMMEXCHANGE_ABI } from '@/constants/abis';
 
+function parseContractError(error: unknown): string {
+  const message = (error as Error)?.message ?? '';
+  if (
+    message.includes('insufficient funds') ||
+    message.includes('exceeds the balance') ||
+    message.includes('InsufficientFunds')
+  ) {
+    return 'Insufficient ETH to cover gas fees. Please add ETH to your wallet and try again.';
+  }
+  if (message.includes('User rejected') || message.includes('user rejected')) {
+    return 'Transaction cancelled.';
+  }
+  return message;
+}
+
 export const useExchange = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,7 +114,7 @@ export const useExchange = () => {
         tokenAddress
       ) as unknown as bigint;
       if (balance < tokenAmount) {
-        throw new Error('Insufficient xLTC balance.');
+        throw new Error('Insufficient zkLTC balance.');
       }
 
       const tokenName = await contractManager.readContract(
@@ -190,7 +205,7 @@ export const useExchange = () => {
       return newPosition;
     } catch (error) {
       setLoading(false);
-      setError((error as Error).message);
+      setError(parseContractError(error));
       console.log('openPosition error', error);
     }
   };
@@ -264,7 +279,7 @@ export const useExchange = () => {
       return newReservation;
     } catch (error) {
       setLoading(false);
-      setError((error as Error).message);
+      setError(parseContractError(error));
       console.log('reservePosition error', error);
     }
   };
@@ -293,7 +308,7 @@ export const useExchange = () => {
       return position;
     } catch (error) {
       setLoading(false);
-      setError((error as Error).message);
+      setError(parseContractError(error));
       console.error('getPosition error:', error);
       throw error;
     }
@@ -328,7 +343,7 @@ export const useExchange = () => {
       };
     } catch (error) {
       setLoading(false);
-      setError((error as Error).message);
+      setError(parseContractError(error));
       console.error('getReservation error:', error);
       throw error;
     }

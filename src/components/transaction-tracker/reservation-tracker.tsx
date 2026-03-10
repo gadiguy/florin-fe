@@ -177,7 +177,7 @@ export function ReservationTracker({
           {/* Step 4 - Transaction Complete */}
           <TransactionStep
             title="Bridging complete"
-            description="Funds (xLTC) are in your wallet now."
+            description="Funds (zkLTC) are in your wallet now."
             status={bridgingCompleted ? 'completed' : 'pending'}
             isLastStep={true}
             completed={bridgingCompleted}

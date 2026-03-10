@@ -56,8 +56,8 @@ export enum ErrorCode {
 export const parseContractError = (error: any): string => {
   const message = error?.message || '';
   const knownErrors: Record<string, string> = {
-    [ErrorCode.ERC20InsufficientBalance]: 'Insufficient xLTC balance.',
-    [ErrorCode.ERC20InsufficientAllowance]: 'Insufficient xLTC allowance.',
+    [ErrorCode.ERC20InsufficientBalance]: 'Insufficient zkLTC balance.',
+    [ErrorCode.ERC20InsufficientAllowance]: 'Insufficient zkLTC allowance.',
     [ErrorCode.PositionDoesNotExist]: 'Position does not exist.',
     [ErrorCode.PositionNotActive]: 'Position is not active.',
     [ErrorCode.InvalidAmount]: 'Invalid amount.',

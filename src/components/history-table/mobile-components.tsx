@@ -68,7 +68,7 @@ export const MobileTransactionItem = ({
 
         <div className="flex items-center gap-3">
           <div className="text-sm font-medium text-right">
-            <span className="text-white">{tx.amount}</span> {tx.type === 'position' ? 'xLTC' : 'LTC'}
+            <span className="text-white">{tx.amount}</span> {tx.type === 'position' ? 'zkLTC' : 'LTC'}
           </div>
         </div>
       </AccordionTrigger>
@@ -90,7 +90,7 @@ export const MobileTransactionItem = ({
           <div className="grid grid-cols-2 items-center">
             <span className="text-sm">Requested amount</span>
             <span className="text-sm text-right">
-              {tx.amount} {tx.type === 'position' ? 'xLTC' : 'LTC'}
+              {tx.amount} {tx.type === 'position' ? 'zkLTC' : 'LTC'}
             </span>
           </div>
 
@@ -98,7 +98,7 @@ export const MobileTransactionItem = ({
             <span className="text-sm">Received amount</span>
             <span className="text-sm text-right">
               {formatReceivedAmount(tx.receivedAmount, data?.minAmount)}{' '}
-              {tx.type === 'position' ? 'LTC' : 'xLTC'}
+              {tx.type === 'position' ? 'LTC' : 'zkLTC'}
             </span>
           </div>
 

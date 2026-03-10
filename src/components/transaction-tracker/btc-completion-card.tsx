@@ -51,7 +51,7 @@ export function BtcCompletionCard({
         <span className="text-[#FFAA2E] text-[12px] font-medium cursor-pointer flex items-center gap-1">
           <img
             src={logoSrc}
-            alt={type === 'position' ? 'LTC' : 'xLTC'}
+            alt={type === 'position' ? 'LTC' : 'zkLTC'}
             className="w-4 h-4 inline"
           />
           <a href={`${getExplorerUrl(reservationTx)}/tx/${reservationTx}`} target="_blank">
