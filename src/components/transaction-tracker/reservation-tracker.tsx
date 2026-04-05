@@ -15,12 +15,15 @@ import { useReservation } from '@/hooks/queries/useReservation';
 import { RESERVATION_STATUS_MAP } from '../history-table/transaction-history-adapter';
 import { useBtcBlockConfirmations } from '@/hooks/useBtcBlockConfirmations';
 import { env } from '@/config/env';
+import { TargetChain } from '@/types/chains';
+import { useLiteforgeEvent } from '@/hooks/useLiteforgeEvent';
 
 interface ReservationTrackerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   id: string;
   txHash: string;
+  targetChain?: TargetChain;
 }
 
 export function ReservationTracker({
@@ -28,6 +31,7 @@ export function ReservationTracker({
   onOpenChange,
   id,
   txHash,
+  targetChain,
 }: ReservationTrackerProps) {
   const [shouldPoll, setShouldPoll] = useState(open);
   const { data } = useReservation(id, {
@@ -65,6 +69,8 @@ export function ReservationTracker({
     blockNumber: reservation?.originBlockNumber,
   });
 
+  const isLiteforge = targetChain === 'liteforge';
+
   const status = RESERVATION_STATUS_MAP[evmReservation?.status || 0];
   const bridgingCompleted = status === ReservationStatus.Settled || !!reservation?.targetTxhash;
   const btcReadyToSend =
@@ -76,13 +82,19 @@ export function ReservationTracker({
     transactionHash: reservation?.targetTxhash,
   });
 
+  const { bridgedEvent } = useLiteforgeEvent({
+    isActive: isLiteforge && bridgingCompleted && shouldPoll,
+    chainId: chainId || 0,
+  });
+  const liteforgeArrived = !!bridgedEvent;
+
   const queryClient = useQueryClient();
   const { address } = useAccount();
 
   useEffect(() => {
-    const should = open && !bridgingCompleted;
+    const should = open && (isLiteforge ? !liteforgeArrived : !bridgingCompleted);
     setShouldPoll(should);
-  }, [bridgingCompleted, open]);
+  }, [bridgingCompleted, liteforgeArrived, open, isLiteforge]);
 
   useEffect(() => {
     if (bridgingCompleted) {
@@ -94,7 +106,7 @@ export function ReservationTracker({
     }
   }, [bridgingCompleted]);
 
-  const maxHeightClass = !bridgingCompleted
+  const maxHeightClass = (isLiteforge ? !liteforgeArrived : !bridgingCompleted)
     ? 'max-h-[90vh] md:h-[813px]'
     : 'max-h-[90vh]';
 
@@ -191,9 +203,9 @@ export function ReservationTracker({
           {/* Step 4 - Transaction Complete */}
           <TransactionStep
             title="Bridging complete"
-            description="Funds (zkLTC) are in your wallet now."
+            description={isLiteforge ? 'zkLTC received on Sepolia.' : 'Funds (zkLTC) are in your wallet now.'}
             status={bridgingCompleted ? 'completed' : 'pending'}
-            isLastStep={true}
+            isLastStep={!isLiteforge}
             completed={bridgingCompleted}
           >
             {bridgingCompleted && (
@@ -210,6 +222,36 @@ export function ReservationTracker({
               />
             )}
           </TransactionStep>
+
+          {/* Steps 5 & 6 — Liteforge only */}
+          {isLiteforge && (
+            <>
+              <TransactionStep
+                title="Bridging to Liteforge"
+                description="zkLTC is being sent to Liteforge via the native bridge."
+                status={liteforgeArrived ? 'completed' : bridgingCompleted ? 'current' : 'pending'}
+                completed={liteforgeArrived}
+              />
+
+              <TransactionStep
+                title="Arrived on Liteforge"
+                description="Your zkLTC has arrived at your address on Liteforge."
+                status={liteforgeArrived ? 'completed' : 'pending'}
+                isLastStep={true}
+                completed={liteforgeArrived}
+              >
+                {liteforgeArrived && (
+                  <EthCompletionCard
+                    amount={xltcAmount}
+                    confirmations={0}
+                    recipientAddress={bridgedEvent?.args.l2Recipient || ''}
+                    reservationTx={bridgedEvent?.transactionHash || ''}
+                    type="reservation"
+                  />
+                )}
+              </TransactionStep>
+            </>
+          )}
         </>
       )}
     </BaseTransactionTracker>

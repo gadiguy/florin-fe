@@ -2986,3 +2986,16 @@ export const NATIVE_BRIDGE_ABI = [
     type: 'function',
   },
 ];
+
+export const LITEFORGE_DEPOSITOR_ABI = [
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true,  internalType: 'address', name: 'l2Recipient', type: 'address' },
+      { indexed: false, internalType: 'uint256', name: 'amount',      type: 'uint256' },
+      { indexed: false, internalType: 'uint256', name: 'messageNum',  type: 'uint256' },
+    ],
+    name: 'Bridged',
+    type: 'event',
+  },
+] as const;

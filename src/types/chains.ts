@@ -8,3 +8,10 @@ export enum ChainId {
   ModeSepolia = 919,
   Hardhat = 31337,
 }
+
+export type TargetChain = 'sepolia' | 'liteforge';
+
+export const TARGET_CHAIN_LABELS: Record<TargetChain, string> = {
+  sepolia: 'Sepolia',
+  liteforge: 'Liteforge',
+};

@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { Address } from 'viem';
 import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
+import { TargetChain, TARGET_CHAIN_LABELS } from '@/types/chains';
 
 interface TransferFormProps {
   fromNetwork: 'bitcoin' | 'ethereum';
@@ -20,6 +21,8 @@ interface TransferFormProps {
   ethWalletAddress?: Address;
   bitcoinAddress?: string;
   bitcoinAddressValid?: boolean;
+  targetChain: TargetChain;
+  onTargetChainChange: (chain: TargetChain) => void;
   handleSwitchNetworks: () => void;
   handleFromAmountChange: (value: string) => void;
   handleToAmountChange: (value: string) => void;
@@ -41,6 +44,8 @@ export function TransferForm({
   ethWalletAddress,
   bitcoinAddress,
   bitcoinAddressValid = true,
+  targetChain,
+  onTargetChainChange,
   handleSwitchNetworks,
   handleFromAmountChange,
   handleToAmountChange,
@@ -131,6 +136,36 @@ export function TransferForm({
           }
         />
       </div>
+
+      {fromNetwork === 'bitcoin' && (
+        <div
+          className={cn(
+            'flex flex-col gap-1.5 w-full mt-3 transition-all duration-300 ease-in-out',
+            isAnimating ? 'opacity-0' : 'opacity-100'
+          )}
+        >
+          <Label className="text-xs text-text-secondary font-bold">
+            Destination chain
+          </Label>
+          <div className="flex gap-2">
+            {(Object.keys(TARGET_CHAIN_LABELS) as TargetChain[]).map((chain) => (
+              <button
+                key={chain}
+                type="button"
+                onClick={() => onTargetChainChange(chain)}
+                className={cn(
+                  'flex-1 h-[48px] rounded-[10px] text-[14px] font-medium transition-colors',
+                  targetChain === chain
+                    ? 'bg-[#FFAA2E] text-black'
+                    : 'bg-grey border border-input-border text-text-secondary hover:bg-gray-700'
+                )}
+              >
+                {TARGET_CHAIN_LABELS[chain]}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {toCurrency === 'btc' && (
         <div
