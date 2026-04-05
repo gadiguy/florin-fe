@@ -6,6 +6,7 @@ export const CONTRACTS_ADDRESS = {
     marketMakerProxy: '0xD7b953b8930C103589E10d4Ff30F4Ed4D64A4d85',
     florinForwarder: '0xa9f24c03A309bF72086CF7496771eFa02C3b99D9',
     erc20BitSnark: '0xaE9190aEca45F50dCDa0483c0223E191E6811ad2',
+    nativeBridge: '0x8A381f8822E512E50dd4679E678271E9a83226E6',
     contractRegistry: '0x204652c13363cc43a7bC87B23b13870A0DB20a03',
     defaultPositionId: '0xf0e94d3b55389b66f693bf6a4ae0eec46a1e61342c9efeaa96ba6ada1d555ca2',
   },
