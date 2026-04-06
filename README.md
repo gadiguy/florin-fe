@@ -1,9 +1,15 @@
 # Florin Frontend
 
 ## Overview
-Florin is a modern web application built with React and TypeScript. It provides a user-friendly interface for interacting with blockchain functionality, featuring components for wallet integration, QR code generation, and form handling.
+
+Florin is the frontend for the Florin Bridge — a trustless cross-chain bridge between **Litecoin** and **Ethereum-compatible networks**. Users can swap assets in three directions:
+
+- **Litecoin → Sepolia**: Send LTC, receive **zkLTC** (ERC-20) on Ethereum Sepolia.
+- **Litecoin → Liteforge**: Send LTC, receive **zkLTC** directly on **Liteforge** — an Arbitrum-based L2 rollup.
+- **Ethereum → Litecoin**: Send zkLTC on Ethereum, receive LTC on-chain.
 
 ## Tech Stack
+
 - **Frontend Framework**: React 19
 - **Language**: TypeScript
 - **Build Tool**: Vite 6
@@ -19,48 +25,51 @@ Florin is a modern web application built with React and TypeScript. It provides 
 ## Setup
 
 ### Prerequisites
+
 - Node.js (Latest LTS version recommended)
 - npm or yarn package manager
 
 ### Installation
+
 1. Clone the repository:
+
 ```bash
-git clone [repository-url]
+git clone git@github.com:gadiguy/florin-fe.git
 cd florin-fe
 ```
 
-2. Install dependencies:
+1. Install dependencies:
+
 ```bash
 npm install
-# or
-yarn install
 ```
 
 ### Development
+
 To start the development server:
+
 ```bash
 npm run dev
-# or
-yarn dev
 ```
+
 The application will be available at `http://localhost:5173`
 
 ### Production Build
+
 To create a production build:
+
 ```bash
 npm run build
-# or
-yarn build
 ```
 
 To preview the production build locally:
+
 ```bash
 npm run preview
-# or
-yarn preview
 ```
 
 ## Environment Variables
+
 The application uses environment variables for configuration. Create a `.env` file in the root directory with the following variables:
 
 ```env
@@ -76,40 +85,43 @@ VITE_API_BASE_URL="https://florin.bitcoinos.build"
 # Number of hours until a transaction expires
 VITE_EXPIRATION_HOURS=24
 
-# Minimum amount allowed for transactions (in BTC)
+# Minimum amount allowed for transactions (in LTC)
 VITE_MIN_AMOUNT="0.0004"
 
-# Maximum amount allowed for transactions (in BTC)
+# Maximum amount allowed for transactions (in LTC)
 VITE_MAX_AMOUNT="3"
 
 # Number of confirmations required for EVM transactions to be completed
 VITE_EVM_CONFIRMATIONS=10
 
-# USD amount threshold that determines if the ui shows up the second step immediately or if wait for VITE_EVM_CONFIRMATIONS confirmations
-
+# USD amount threshold: below this value EVM confirmations are skipped
 VITE_EVM_CONFIRMATIONS_USD_AMOUNT=100
 
-# Number of confirmations required for Bitcoin transactions
+# Number of confirmations required for Bitcoin/Litecoin transactions
 VITE_BTC_CONFIRMATIONS=6
 
 # Default position id for reservation
 VITE_DEFAULT_POSITION_ID=
 ```
 
-## Contract Addresses Configuration
-The application uses different contract addresses for different networks. These addresses are configured in `src/constants/contracts.ts`. To modify the contract addresses:
+> **Production**: All environment variables are managed in **Netlify** — do not commit production values to `.env`.
 
-1. Navigate to `src/constants/contracts.ts`
-2. Update the addresses in the `CONTRACTS_ADDRESS` object for the desired network:
-   - `ammExchange`: AMM Exchange contract address
-   - `marketMakerProxy`: Market Maker Proxy contract address
-   - `florinForwarder`: Florin Forwarder contract address
-   - `erc20BitSnark`: ERC20 BitSnark token contract address
-   - `contractRegistry`: Contract Registry address
+## Contract Addresses (Sepolia)
 
-The file supports multiple networks, Sepolia testnet (chain ID: 11155111) and local development (chain ID: 31337).
+Contract addresses are configured in `src/constants/contracts.ts`.
+
+| Contract | Address |
+| --- | --- |
+| AMMExchange | `0x15EF38c3e42150e8B0156C22f27f93B26804e3bd` |
+| MarketMakerProxy | `0xD7b953b8930C103589E10d4Ff30F4Ed4D64A4d85` |
+| FlorinForwarder | `0xa9f24c03A309bF72086CF7496771eFa02C3b99D9` |
+| zkLTC (ERC-20) | `0xaE9190aEca45F50dCDa0483c0223E191E6811ad2` |
+| Native Bridge (ERC20Inbox) | `0x8A381f8822E512E50dd4679E678271E9a83226E6` |
+| LiteforgeDepositor | `0x4C16c6cd9DC8e21F1EaF52F11167199CF3C8F934` |
+| ContractRegistry | `0x204652c13363cc43a7bC87B23b13870A0DB20a03` |
 
 ## Main Scripts
+
 - `npm run dev` - Start development server
 - `npm run build` - Create production build
 - `npm run preview` - Preview production build
@@ -117,11 +129,10 @@ The file supports multiple networks, Sepolia testnet (chain ID: 11155111) and lo
 - `npm run format` - Format code with Prettier
 - `npm run test` - Run tests
 - `npm run test:coverage` - Run tests with coverage report
-- `npm run deploy-prod` - Deploy to production
-- `npm run deploy-staging` - Deploy to staging
 
 ## Tests
-The project uses Vitest and React Testing Library for testing. To run tests:
+
+The project uses Vitest and React Testing Library for testing.
 
 ```bash
 # Run tests in watch mode
@@ -132,19 +143,17 @@ npm run test:coverage
 ```
 
 ## Deployment
-The project is deployed using github actions and netlify. Set the followings actions variables in order to correctly deploy to netlify: 
 
-NETLIFY_SITE_ID
-NETLIFY_AUTH_TOKEN
+The project is deployed on **Netlify** via GitHub Actions.
 
-### Continuous deployment trigger
-On every new commit to `develop` (netflify preview) and `main` (netlify production)
+- `develop` branch → Netlify preview
+- `main` branch → Netlify production
+
+Required secrets: `NETLIFY_SITE_ID`, `NETLIFY_AUTH_TOKEN`
 
 ## Contributing
+
 1. Create a new branch for your feature
 2. Make your changes
-3. Run tests and ensure they pass
+3. Run `npm run build` and confirm it passes
 4. Submit a pull request
-
-## License
-[Add your license information here]
