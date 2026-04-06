@@ -5,7 +5,7 @@ import { useAmountInput } from '@/hooks/amount-input/useAmountInput';
 import { AmountInputHeader } from './amount-input-header';
 
 interface AmountInputProps {
-  network: 'bitcoin' | 'ethereum';
+  network: 'bitcoin' | 'ethereum' | 'liteforge';
   currency: 'btc' | 'eth' | 'xbtc';
   amount: string;
   xbtcAmount?: string;
@@ -50,12 +50,12 @@ export const AmountInput = ({
   });
 
   const cardBgClass = cn({
-    'bg-[var(--card-ethereum-bg)]': network === 'ethereum',
+    'bg-[var(--card-ethereum-bg)]': network === 'ethereum' || network === 'liteforge',
     'bg-[var(--card-bitcoin-bg)]': network === 'bitcoin'
   });
 
   const cardBorderClass =
-    network === 'ethereum' ? 'border border-input-border' : 'border-none';
+    network === 'ethereum' || network === 'liteforge' ? 'border border-input-border' : 'border-none';
 
   const xbtcCardClass =
     currency === 'xbtc' ? 'bg-[#2A273080] border border-[#27292C]' : '';

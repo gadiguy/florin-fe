@@ -7,10 +7,11 @@ import { Address } from 'viem';
 import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
 import { TargetChain, TARGET_CHAIN_LABELS } from '@/types/chains';
+import { Network } from './types';
 
 interface TransferFormProps {
-  fromNetwork: 'bitcoin' | 'ethereum';
-  toNetwork: 'bitcoin' | 'ethereum';
+  fromNetwork: Network;
+  toNetwork: Network;
   fromCurrency: 'btc' | 'eth' | 'xbtc';
   toCurrency: 'btc' | 'eth' | 'xbtc';
   fromAmount: string;
@@ -29,6 +30,8 @@ interface TransferFormProps {
   setBitcoinAddress: (value: Address | undefined) => void;
   maxBtc: number;
   minBtc: number;
+  onSelectLiteforgeMode: () => void;
+  onExitLiteforgeMode: () => void;
 }
 
 export function TransferForm({
@@ -52,9 +55,12 @@ export function TransferForm({
   setBitcoinAddress,
   maxBtc,
   minBtc,
+  onSelectLiteforgeMode,
+  onExitLiteforgeMode,
 }: TransferFormProps) {
   const { data: bitcoinPrice } = useBitcoinPrice();
   const isFromXbtcToBtc = fromCurrency === 'xbtc' && toCurrency === 'btc';
+  const isLiteforgeMode = fromNetwork === 'liteforge';
 
   return (
     <div
@@ -81,16 +87,28 @@ export function TransferForm({
           readOnly={false}
         />
       </div>
-      <div
-        className={`flex justify-center items-center bg-grey rounded-[10px] w-10 h-10 my-3 cursor-pointer hover:bg-gray-700 transition-colors`}
-        onClick={handleSwitchNetworks}
-      >
-        <img
-          src={switchArrows}
-          alt="Switch"
-          className="h-[13.846px] w-[15px]"
-        />
-      </div>
+
+      {isLiteforgeMode ? (
+        <button
+          type="button"
+          onClick={onExitLiteforgeMode}
+          className="text-xs text-text-secondary hover:text-text-primary mt-3 mb-0 underline underline-offset-2 transition-colors"
+        >
+          ← Back to standard mode
+        </button>
+      ) : (
+        <div
+          className={`flex justify-center items-center bg-grey rounded-[10px] w-10 h-10 my-3 cursor-pointer hover:bg-gray-700 transition-colors`}
+          onClick={handleSwitchNetworks}
+        >
+          <img
+            src={switchArrows}
+            alt="Switch"
+            className="h-[13.846px] w-[15px]"
+          />
+        </div>
+      )}
+
       <div
         className={`w-full transition-all duration-300 ease-in-out ${
           isAnimating
@@ -112,32 +130,34 @@ export function TransferForm({
         />
       </div>
 
-      <div
-        className={cn(
-          'flex flex-col gap-1.5 w-full mt-3 transition-all duration-300 ease-in-out',
-          isAnimating ? 'opacity-0' : 'opacity-100'
-        )}
-      >
-        <Label
-          htmlFor="wallet-address"
-          className="text-xs text-text-secondary font-bold flex flex-row gap-1"
+      {!isLiteforgeMode && (
+        <div
+          className={cn(
+            'flex flex-col gap-1.5 w-full mt-3 transition-all duration-300 ease-in-out',
+            isAnimating ? 'opacity-0' : 'opacity-100'
+          )}
         >
-          Ethereum sending address
-          <InfoTooltip
-            message="The sending amount is calculated in LTC. Ethereum token X, Y, Z can be used for transfer"
-            position="top"
+          <Label
+            htmlFor="wallet-address"
+            className="text-xs text-text-secondary font-bold flex flex-row gap-1"
+          >
+            Ethereum sending address
+            <InfoTooltip
+              message="The sending amount is calculated in LTC. Ethereum token X, Y, Z can be used for transfer"
+              position="top"
+            />
+          </Label>
+          <Input
+            id="wallet-address"
+            disabled={true}
+            placeholder={
+              isWalletConnected ? ethWalletAddress : 'Connect your wallet first'
+            }
           />
-        </Label>
-        <Input
-          id="wallet-address"
-          disabled={true}
-          placeholder={
-            isWalletConnected ? ethWalletAddress : 'Connect your wallet first'
-          }
-        />
-      </div>
+        </div>
+      )}
 
-      {fromNetwork === 'bitcoin' && (
+      {!isLiteforgeMode && fromNetwork === 'bitcoin' && (
         <div
           className={cn(
             'flex flex-col gap-1.5 w-full mt-3 transition-all duration-300 ease-in-out',
@@ -167,7 +187,8 @@ export function TransferForm({
         </div>
       )}
 
-      {toCurrency === 'btc' && (
+      {/* LTC receiving address — shown for ethereum→bitcoin AND liteforge→bitcoin */}
+      {(toCurrency === 'btc' || isLiteforgeMode) && (
         <div
           className={cn(
             'flex flex-col gap-1.5 w-full mt-3 transition-all duration-300 ease-in-out',
@@ -201,6 +222,20 @@ export function TransferForm({
             )}
           />
         </div>
+      )}
+
+      {/* Liteforge mode entry link — shown only in standard mode */}
+      {!isLiteforgeMode && (
+        <button
+          type="button"
+          onClick={onSelectLiteforgeMode}
+          className={cn(
+            'mt-3 text-xs text-text-secondary hover:text-[#FFAA2E] transition-colors underline underline-offset-2',
+            isAnimating ? 'opacity-0' : 'opacity-100'
+          )}
+        >
+          Bridge from Liteforge → LTC
+        </button>
       )}
     </div>
   );

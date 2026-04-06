@@ -10,7 +10,7 @@ import {
   custom,
 } from 'viem';
 import { getConnectorClient } from '@wagmi/core';
-import { AMMEXCHANGE_ABI, ERC20_BITSNARK_ABI, LITEFORGE_DEPOSITOR_ABI } from '@/constants/abis';
+import { AMMEXCHANGE_ABI, ERC20_BITSNARK_ABI, LITEFORGE_DEPOSITOR_ABI, LITEFORGE_SWAP_ABI } from '@/constants/abis';
 import { CMError, ContractError, parseContractError } from '@/lib/errors';
 import { TransactionResponse } from '@/types';
 import { Address } from 'viem';
@@ -106,6 +106,7 @@ export class ContractManager {
       instance.registerContract('AMMExchange', AMMEXCHANGE_ABI);
       instance.registerContract('ERC20BitSnark', ERC20_BITSNARK_ABI);
       instance.registerContract('LiteforgeDepositor', LITEFORGE_DEPOSITOR_ABI as unknown as []);
+      instance.registerContract('LiteforgeSwap', LITEFORGE_SWAP_ABI as unknown as []);
       this.instance = instance;
     } catch (error) {
       console.error('Error initializing ContractManager:', error);

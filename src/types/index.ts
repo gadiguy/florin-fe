@@ -157,7 +157,15 @@ export type TransactionHistoryItem = {
   blockTimestamp?: string;
 };
 
-export type TransactionHistory = TransactionHistoryItem[]; 
+export type TransactionHistory = TransactionHistoryItem[];
+
+export interface LiteforgeSwap {
+  l2TxHash: string;
+  userAddress: string;
+  ltcAddress: string;
+  amount: string;
+  state: 'pending' | 'ltc_sent' | 'completed';
+}
 
 export interface Transaction {
   hash: string;

@@ -6,21 +6,22 @@ import { ConnectButton } from './connect-button';
 import { Button } from '../ui/button';
 import { isValidBitcoinAddress } from '@/lib/utils';
 import { Network, Currency } from './types';
-import { useChainId } from 'wagmi';
+import { useChainId, useSwitchChain } from 'wagmi';
 import { Address, parseEther } from 'viem';
 import { useExchange } from '@/hooks/useExchange';
+import { useLiteforgeSwap } from '@/hooks/useLiteforgeSwap';
 import { Position, Reservation } from '@/types';
 import { useMaxMinBtc } from '@/hooks/queries/useMaxMinBtc';
 import { useBitSnarkBalance } from '@/hooks/useBitSnarkBalance';
 import { useAccount } from 'wagmi';
 import { useSupportedChains } from '@/hooks/useSupportedChains';
 import { useToast } from '@/hooks/useToast';
-import { TargetChain } from '@/types/chains';
+import { TargetChain, ChainId } from '@/types/chains';
 import { CONTRACTS_ADDRESS } from '@/constants/contracts';
 
 interface TransferTabProps {
   onTransactionCreated: (
-    type: 'position' | 'reservation',
+    type: 'position' | 'reservation' | 'liteforge-swap',
     id: string,
     txHash: string,
     targetChain?: TargetChain
@@ -30,6 +31,7 @@ interface TransferTabProps {
 export function TransferTab({ onTransactionCreated }: TransferTabProps) {
   const { address } = useAccount();
   const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
   const [fromNetwork, setFromNetwork] = useState<Network>('bitcoin');
   const [toNetwork, setToNetwork] = useState<Network>('ethereum');
   const [fromCurrency, setFromCurrency] = useState<Currency>(
@@ -51,12 +53,18 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
   const {
     openPosition,
     reservePosition,
-    loading,
-    error,
+    loading: exchangeLoading,
+    error: exchangeError,
     estimateOpenPositionGas,
     estimateReservePositionGas,
-    setError,
+    setError: setExchangeError,
   } = useExchange();
+  const {
+    swap: liteforgeSwap,
+    loading: liteforgeLoading,
+    error: liteforgeError,
+    setError: setLiteforgeError,
+  } = useLiteforgeSwap();
   const { data } = useMaxMinBtc();
   const maxBtc = data?.maxAmount || 0;
   const minBtc = data?.minAmount || 0;
@@ -64,12 +72,16 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
   const isWalletConnected = !!address;
   const { showError } = useToast();
 
+  const isLiteforgeMode = fromNetwork === 'liteforge';
+  const loading = isLiteforgeMode ? liteforgeLoading : exchangeLoading;
+
   const updateGasEstimate = async () => {
     if (
       !address ||
       !chainId ||
       !fromAmount ||
-      fromAmount === '0'
+      fromAmount === '0' ||
+      isLiteforgeMode
     ) {
       setEstimatedGasFee(0);
       return;
@@ -100,11 +112,18 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
   }, [fromAmount, fromNetwork, bitcoinAddress, address, chainId, toAmount]);
 
   useEffect(() => {
-    if (error) {
-      showError(error);
-      setError(null);
+    if (exchangeError) {
+      showError(exchangeError);
+      setExchangeError(null);
     }
-  }, [error, showError]);
+  }, [exchangeError, showError]);
+
+  useEffect(() => {
+    if (liteforgeError) {
+      showError(liteforgeError);
+      setLiteforgeError(null);
+    }
+  }, [liteforgeError, showError]);
 
   const handleSwitchNetworks = () => {
     if (isAnimating) return;
@@ -112,8 +131,8 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
     setIsAnimating(true);
 
     setTimeout(() => {
-      setFromNetwork(toNetwork);
-      setToNetwork(fromNetwork);
+      setFromNetwork(toNetwork as Network);
+      setToNetwork(fromNetwork as Network);
       setFromCurrency(toCurrency);
       setToCurrency(fromCurrency);
 
@@ -125,6 +144,28 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
         setIsAnimating(false);
       }, 300);
     }, 300);
+  };
+
+  const handleSelectLiteforgeMode = () => {
+    setFromNetwork('liteforge');
+    setToNetwork('bitcoin');
+    setFromCurrency('eth');
+    setToCurrency('btc');
+    setFromAmount('0');
+    setToAmount('0');
+    setBitcoinAddress(undefined);
+    setTermsAccepted(false);
+  };
+
+  const handleExitLiteforgeMode = () => {
+    setFromNetwork('bitcoin');
+    setToNetwork('ethereum');
+    setFromCurrency('btc');
+    setToCurrency('xbtc');
+    setFromAmount('0');
+    setToAmount('0');
+    setBitcoinAddress(undefined);
+    setTermsAccepted(false);
   };
 
   const handleFromAmountChange = (value: string) => {
@@ -142,6 +183,20 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
   const handleBridgeFunds = async () => {
     const normalizedAmount = fromAmount.replace(',', '.');
     const parsedAmount = parseEther(normalizedAmount);
+
+    if (isLiteforgeMode) {
+      // Switch to Liteforge chain before calling swap
+      switchChain({ chainId: ChainId.LiteforgeTestnet });
+      const result = await liteforgeSwap({
+        ltcAddress: bitcoinAddress!,
+        amount: parsedAmount,
+      });
+      if (result) {
+        onTransactionCreated('liteforge-swap', result.txHash, result.txHash);
+      }
+      return;
+    }
+
     let transaction: Position | Reservation | undefined;
     if (fromNetwork === 'bitcoin') {
       const contracts = CONTRACTS_ADDRESS[chainId as keyof typeof CONTRACTS_ADDRESS];
@@ -178,24 +233,23 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
   };
 
   const isBitcoinAddressValid =
-    fromNetwork === 'ethereum' && toCurrency === 'btc'
+    (fromNetwork === 'ethereum' && toCurrency === 'btc') || isLiteforgeMode
       ? isValidBitcoinAddress(bitcoinAddress as string)
       : true;
 
   const disabled =
     !termsAccepted ||
     loading ||
-    (fromNetwork === 'ethereum' &&
+    ((fromNetwork === 'ethereum' || isLiteforgeMode) &&
       (!bitcoinAddress || !isBitcoinAddressValid)) ||
-    Number(fromAmount) < minBtc ||
-    Number(fromAmount) > maxBtc;
+    (!isLiteforgeMode && Number(fromAmount) < minBtc) ||
+    (!isLiteforgeMode && Number(fromAmount) > maxBtc);
 
   const handleBridgeAndReset = async () => {
     await handleBridgeFunds();
-    // Reset form after bridge operation
     handleFromAmountChange('');
     handleToAmountChange('');
-    if (fromNetwork === 'ethereum') {
+    if (fromNetwork === 'ethereum' || isLiteforgeMode) {
       setBitcoinAddress('');
     }
     setTermsAccepted(false);
@@ -224,6 +278,8 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
         setBitcoinAddress={setBitcoinAddress}
         maxBtc={maxBtc}
         minBtc={minBtc}
+        onSelectLiteforgeMode={handleSelectLiteforgeMode}
+        onExitLiteforgeMode={handleExitLiteforgeMode}
       />
       <FeeCard
         toCurrency={toCurrency}
@@ -254,7 +310,7 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
             disabled={disabled}
             loading={loading}
           >
-            {'Bridge funds'}
+            {isLiteforgeMode ? 'Swap to LTC' : 'Bridge funds'}
           </Button>
         )}
       </div>

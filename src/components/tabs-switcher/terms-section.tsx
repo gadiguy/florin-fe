@@ -6,7 +6,7 @@ import { Link } from '@tanstack/react-router';
 interface TermsSectionProps {
   termsAccepted: boolean;
   setTermsAccepted: (value: boolean) => void;
-  toNetwork: 'bitcoin' | 'ethereum';
+  toNetwork: 'bitcoin' | 'ethereum' | 'liteforge';
   isAnimating: boolean;
 }
 

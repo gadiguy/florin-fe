@@ -1,11 +1,12 @@
 import { ReservationTracker } from './reservation-tracker';
 import { PositionTracker } from './position-tracker';
+import { LiteforgeSwapTracker } from './liteforge-swap-tracker';
 import { TargetChain } from '@/types/chains';
 
 interface TransactionTrackerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  type: 'reservation' | 'position';
+  type: 'reservation' | 'position' | 'liteforge-swap';
   id: string;
   txHash: string;
   targetChain?: TargetChain;
@@ -19,6 +20,16 @@ export function TransactionTrackerDialog({
   txHash,
   targetChain,
 }: TransactionTrackerDialogProps) {
+  if (type === 'liteforge-swap') {
+    return (
+      <LiteforgeSwapTracker
+        open={open}
+        onOpenChange={onOpenChange}
+        txHash={txHash}
+      />
+    );
+  }
+
   if (type === 'reservation') {
     return (
       <ReservationTracker

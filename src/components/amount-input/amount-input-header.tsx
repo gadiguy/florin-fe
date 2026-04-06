@@ -3,7 +3,7 @@ import walletIcon from '@/assets/wallet-icon.svg';
 import { cn } from '@/lib/utils';
 
 interface AmountInputHeaderProps {
-  network: 'bitcoin' | 'ethereum';
+  network: 'bitcoin' | 'ethereum' | 'liteforge';
   currency: 'btc' | 'eth' | 'xbtc';
   xbtcAmount?: string;
 }
@@ -15,6 +15,7 @@ export const AmountInputHeader = ({
 }: AmountInputHeaderProps) => {
   const networkLogoSrc = ASSETS.NETWORK_LOGOS[network];
   const bgColor = network === 'bitcoin' ? 'bg-bitcoin-bg' : 'bg-ethereum-bg';
+  const label = network === 'bitcoin' || network === 'liteforge' ? 'From' : 'To';
 
   const formattedAmount = xbtcAmount 
     ? Number(xbtcAmount).toLocaleString('en-US', {
@@ -27,7 +28,7 @@ export const AmountInputHeader = ({
     <div className="flex items-center justify-between gap-2">
       <div className="flex items-center gap-2">
         <span className="text-label-text font-inter font-medium text-xs sm:text-[13px] leading-[100%] tracking-[0%]">
-          {network === 'bitcoin' ? 'From' : 'To'}
+          {label}
         </span>
         <div className="flex items-center gap-1 sm:gap-2">
           <div

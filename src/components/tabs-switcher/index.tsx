@@ -8,7 +8,7 @@ import { TargetChain } from '@/types/chains';
 export function TabSwitcherContainer() {
   const [activeTab, setActiveTab] = useState(0);
   const [trackerData, setTrackerData] = useState<{
-    type: 'position' | 'reservation';
+    type: 'position' | 'reservation' | 'liteforge-swap';
     open: boolean;
     transactionId: string;
     txHash: string;

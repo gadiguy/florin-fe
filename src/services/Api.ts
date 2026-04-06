@@ -1,5 +1,5 @@
 import { env } from '@/config/env';
-import { Position, Reservation, TransactionHistory } from '@/types';
+import { Position, Reservation, TransactionHistory, LiteforgeSwap } from '@/types';
 
 const API_BASE_URL = env.VITE_API_BASE_URL;
 
@@ -126,6 +126,13 @@ export class FlorinApiService {
     if (!response.ok) {
       throw new Error(`Failed to fetch block count: ${response.statusText}`);
     }
+    return response.json();
+  }
+
+  static async getLiteforgeSwap(txHash: string): Promise<LiteforgeSwap | null> {
+    if (!txHash) return null;
+    const response = await fetch(`${API_BASE_URL}/liteforge-swap/${txHash}`);
+    if (!response.ok) return null;
     return response.json();
   }
 }

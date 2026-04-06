@@ -2999,3 +2999,24 @@ export const LITEFORGE_DEPOSITOR_ABI = [
     type: 'event',
   },
 ] as const;
+
+export const LITEFORGE_SWAP_ABI = [
+  {
+    name: 'swap',
+    type: 'function',
+    stateMutability: 'payable',
+    inputs: [{ name: 'ltcAddress', type: 'bytes32' }],
+    outputs: [],
+  },
+  {
+    anonymous: false,
+    name: 'SwapInitiated',
+    type: 'event',
+    inputs: [
+      { indexed: true,  internalType: 'address', name: 'user',       type: 'address' },
+      { indexed: false, internalType: 'bytes32',  name: 'ltcAddress', type: 'bytes32' },
+      { indexed: false, internalType: 'uint256',  name: 'amount',     type: 'uint256' },
+      { indexed: false, internalType: 'uint256',  name: 'messageNum', type: 'uint256' },
+    ],
+  },
+] as const;

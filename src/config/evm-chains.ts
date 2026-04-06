@@ -59,7 +59,17 @@ export const localhost = defineChain({
   },
 });
 
-export const supportedChains = [sepolia, baseSepolia] as const;
+// TODO: update RPC/explorer URLs once liteforge-swap-deployment.json is available
+export const liteforgeTestnet = createChain(
+  ChainId.LiteforgeTestnet,
+  'Liteforge',
+  'ETH',
+  'https://liteforge.rpc.caldera.xyz/http',
+  'https://liteforge.explorer.caldera.xyz',
+  'https://liteforge.explorer.caldera.xyz/api'
+);
+
+export const supportedChains = [sepolia, baseSepolia, liteforgeTestnet] as const;
 
 export const AIRDROP_API_MAP: Record<number, string> = {
   [ChainId.Sepolia]: 'https://sepolia.airdroper.bitcoinos.build',

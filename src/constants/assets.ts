@@ -9,6 +9,7 @@ export const ASSETS = {
   NETWORK_LOGOS: {
     bitcoin: litecoinLogo,
     ethereum: ethLogo,
+    liteforge: ethLogo,
   },
   CURRENCY_LOGOS: {
     btc: litecoinLogo,
@@ -26,4 +27,5 @@ export const CURRENCY_SYMBOLS = {
 export const NETWORK_NAMES = {
   bitcoin: 'Litecoin',
   ethereum: 'Ethereum',
+  liteforge: 'Liteforge',
 };
