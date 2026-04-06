@@ -2,9 +2,8 @@ import { sepolia } from '@/config/evm-chains';
 import { ChainId } from '@/types/chains';
 
 export const CONTRACTS_ADDRESS = {
-  // TODO: update address once liteforge-swap-deployment.json is available
   [ChainId.LiteforgeTestnet]: {
-    liteforgeSwap: '0x0000000000000000000000000000000000000000',
+    liteforgeSwap: '0x087aaAc1E05DbB76b9A9E7a837F9e6C7ebDBfA23',
   },
   [sepolia.id]: {
     ammExchange: '0x15EF38c3e42150e8B0156C22f27f93B26804e3bd',
