@@ -1,5 +1,6 @@
 import { ReservationTracker } from './reservation-tracker';
 import { PositionTracker } from './position-tracker';
+import { TargetChain } from '@/types/chains';
 
 interface TransactionTrackerDialogProps {
   open: boolean;
@@ -7,6 +8,7 @@ interface TransactionTrackerDialogProps {
   type: 'reservation' | 'position';
   id: string;
   txHash: string;
+  targetChain?: TargetChain;
 }
 
 export function TransactionTrackerDialog({
@@ -15,6 +17,7 @@ export function TransactionTrackerDialog({
   type,
   id,
   txHash,
+  targetChain,
 }: TransactionTrackerDialogProps) {
   if (type === 'reservation') {
     return (
@@ -23,6 +26,7 @@ export function TransactionTrackerDialog({
         onOpenChange={onOpenChange}
         id={id}
         txHash={txHash}
+        targetChain={targetChain}
       />
     );
   }

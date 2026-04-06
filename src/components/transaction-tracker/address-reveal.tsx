@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { CopyIcon } from '@radix-ui/react-icons';
-import { CircleProgress } from './circle-progress';
 import { EyeIcon } from './eye-icon';
 import { QRCode } from './qr-code';
 import { getExplorerUrl, truncateAddress } from '@/lib/utils';
@@ -9,12 +8,12 @@ import { getExplorerUrl, truncateAddress } from '@/lib/utils';
 interface AddressRevealProps {
   amount: string;
   address: string;
-  timeLeft: {
+  timeLeft?: {
     hours: number;
     minutes: number;
     seconds: number;
   };
-  progress: number;
+  progress?: number;
   isReadyToSend?: boolean;
 }
 
@@ -38,8 +37,6 @@ function useMediaQuery(query: string) {
 export function AddressReveal({
   amount,
   address,
-  timeLeft,
-  progress,
   isReadyToSend,
 }: AddressRevealProps) {
   const [showAddress, setShowAddress] = useState(isReadyToSend || false);
@@ -52,9 +49,6 @@ export function AddressReveal({
       setShowAddress(true);
     }
   }, [isReadyToSend]);
-
-  // Format time as 00:00:00
-  const formattedTime = `${String(timeLeft.hours).padStart(2, '0')}:${String(timeLeft.minutes).padStart(2, '0')}:${String(timeLeft.seconds).padStart(2, '0')}`;
 
   // Handle copy address to clipboard
   const copyToClipboard = (e: React.MouseEvent) => {
@@ -77,7 +71,7 @@ export function AddressReveal({
       className={`w-full p-3 cursor-pointer border-none bg-[#2A2730] flex flex-col items-center justify-center gap-2 ${
         !showAddress
           ? 'h-[100px] md:h-[116px] justify-center'
-          : 'h-[330px] md:h-[360px]'
+          : 'h-[270px] md:h-[290px]'
       }`}
       onClick={() => {
         if (isReadyToSend) return;
@@ -97,28 +91,13 @@ export function AddressReveal({
           </>
         ) : (
           <>
-            <div className="max-h-full w-full">
-              <div className="flex gap-2 md:gap-4 items-center justify-center mb-3 md:mb-4">
-                <div className="relative w-[35px] h-[35px] md:w-[38px] md:h-[38px]">
-                  <CircleProgress progress={progress} />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-white text-[11px] md:text-[13px] mb-1">
-                    Reservation expires in
-                  </span>
-                  <span className="text-[#4CAF50] text-xl md:text-2xl font-medium text-center">
-                    {formattedTime}
-                  </span>
-                </div>
-              </div>
-            </div>
             <div className="flex justify-between items-center w-full">
               <span className="text-[#888888] text-[11px] md:text-[13px]">
                 Amount
               </span>
               <div className="flex items-center gap-1 md:gap-2">
                 <span className="text-white text-[11px] md:text-[13px]">
-                  ~{amount} BTC
+                  {amount} LTC
                 </span>
                 <div
                   className="cursor-pointer flex items-center justify-center w-[30px] h-[30px] md:w-[33px] md:h-[35px] rounded-lg bg-[#3A3740]"
@@ -132,7 +111,7 @@ export function AddressReveal({
             </div>
             <div className="flex flex-col md:flex-row md:justify-between md:items-center w-full">
               <span className="text-[#888888] text-[11px] md:text-[13px]">
-                Bitcoin address
+                Litecoin address
               </span>
               <div className="flex items-center gap-1 md:gap-2">
                 <span className="text-[#FFAA2E] text-[10px] md:text-[13px] truncate max-w-[100px] md:max-w-none">

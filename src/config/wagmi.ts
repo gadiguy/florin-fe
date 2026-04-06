@@ -17,6 +17,6 @@ export const wagmiConfig = createConfig({
   ssr: true,
   storage: createStorage({ storage: window.localStorage }),
   transports: Object.fromEntries(
-    supportedChains.map((chain) => [chain.id, http()])
+    supportedChains.map((chain) => [chain.id, http(chain.rpcUrls.default.http[0])])
   ) as Record<ChainId, ReturnType<typeof http>>,
 });

@@ -38,7 +38,7 @@ export function EthTransactionCard({
 
   const renderAmount = () => (
     <span className="text-white text-[14px] md:text-[16px] font-medium">
-      {isStepThree ? data.amount : `~${data.amount}`} XBTC
+      {isStepThree ? data.amount : `~${data.amount}`} zkLTC
     </span>
   );
 

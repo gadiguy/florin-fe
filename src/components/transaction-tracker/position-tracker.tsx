@@ -5,7 +5,8 @@ import { BaseTransactionTracker } from './base-transaction-tracker';
 import { usePosition } from '@/hooks/queries/usePosition';
 import { useTxConfirmations } from '@/hooks/useTxConfirmations';
 import { useEVMPositionPolling } from '@/hooks/useEVMPositionPolling';
-import { useChainId } from 'wagmi';
+import { useChainId, useAccount } from 'wagmi';
+import { useQueryClient } from '@tanstack/react-query';
 import { formatUnits } from 'viem';
 import { useMemo, useState, useEffect } from 'react';
 import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
@@ -40,7 +41,7 @@ export function PositionTracker({
     isActive: shouldPoll,
   });
 
-  const amount = formatUnits(evmPosition?.originalAmount || 0n, 8);
+  const amount = formatUnits(evmPosition?.originalAmount || 0n, 18);
   const fiatAmount = useMemo(() => {
     if (!evmPosition?.originalAmount || !bitcoinPrice?.bitcoin?.usd) return '0';
     const usdValue = Number(amount) * bitcoinPrice.bitcoin.usd;
@@ -54,11 +55,23 @@ export function PositionTracker({
 
   const status = POSITION_STATUS_MAP[evmPosition?.status || 1];
   const isPositionCompleted = status === PositionStatus.Closed;
+  const queryClient = useQueryClient();
+  const { address } = useAccount();
 
   useEffect(() => {
     const should = open && !isPositionCompleted;
     setShouldPoll(should);
   }, [isPositionCompleted, open]);
+
+  useEffect(() => {
+    if (isPositionCompleted) {
+      queryClient.setQueryData(
+        ['transactions', 'history', address],
+        (old: { positionId: string; state?: number }[] | undefined) =>
+          old?.map((item) => item.positionId === id ? { ...item, state: 3 } : item)
+      );
+    }
+  }, [isPositionCompleted]);
 
   
   const targetConfirmations = useBtcBlockConfirmations({
@@ -74,6 +87,7 @@ export function PositionTracker({
       onOpenChange={onOpenChange}
       isLoading={isLoading}
       error={error}
+      positionId={id}
     >
       {evmPosition && (
         <>
@@ -100,7 +114,7 @@ export function PositionTracker({
           {/* Step 2 - Bridging complete */}
           <TransactionStep
             title="Bridging complete"
-            description="Funds (BTC) are in your wallet now"
+            description="Funds (LTC) are in your wallet now"
             status={isPositionCompleted ? 'completed' : 'pending'}
             completed={isPositionCompleted}
             isLastStep={true}

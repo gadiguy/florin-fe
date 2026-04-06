@@ -7,7 +7,7 @@ import {
 import { formatUnits } from 'viem';
 
 export type TransactionType = 'position' | 'reservation';
-export type ChainType = 'bitcoin' | 'ethereum';
+export type ChainType = 'Litecoin' | 'Ethereum';
 
 export interface TransactionNormalized {
   type: TransactionType;
@@ -82,14 +82,14 @@ export function transactionHistoryAdapter(
     : new Date();
 
     const state = type === 'position'
-    ? POSITION_STATUS_MAP[item?.targetBlockHash ? 3 : 1]
-    : RESERVATION_STATUS_MAP[item.state || 1]
+    ? POSITION_STATUS_MAP[item.state ?? 1]
+    : item.targetTxhash ? ReservationStatus.Settled : RESERVATION_STATUS_MAP[item.state || 1]
 
   return {
     ...item,
     type: type,
-    fromChain: !item.reservationId ? 'ethereum' : 'bitcoin',
-    toChain: !item.reservationId ? 'bitcoin' : 'ethereum',
+    fromChain: !item.reservationId ? 'Ethereum' : 'Litecoin',
+    toChain: !item.reservationId ? 'Litecoin' : 'Ethereum',
     positionId: item.positionId,
     reservationId: item.reservationId,
     chainId: item.registrationChain,
@@ -100,9 +100,9 @@ export function transactionHistoryAdapter(
     state: state,
     registrationFinality:
       item.registrationFinality === 'FINAL' ? Finality.FINAL : Finality.UNKNOWN,
-    amount: formatUnits(originalAmountToUse, 8) || '0',
-    originalAmount: formatUnits(originalAmountToUse, 8) || '0',
-    receivedAmount: formatUnits(originalAmountToUse, 8) || '0',
+    amount: formatUnits(originalAmountToUse, 18) || '0',
+    originalAmount: formatUnits(originalAmountToUse, 18) || '0',
+    receivedAmount: formatUnits(originalAmountToUse, 18) || '0',
     blockNumber: item.registrationBlockNumber,
     blockHash: item.registrationBlockHash,
     createdAt: createdAtDate.toISOString(), // Not available in new API, using current time

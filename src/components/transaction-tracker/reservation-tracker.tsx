@@ -4,22 +4,26 @@ import { BtcTransactionCard } from './btc-transaction-card';
 import { BtcSendStep } from './btc-send-step';
 import { EthCompletionCard } from './eth-completion-card';
 import { BaseTransactionTracker } from './base-transaction-tracker';
-import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
+import { useLitecoinPrice } from '@/hooks/useLitecoinPrice';
 import { useMemo, useState, useEffect } from 'react';
 import { useTxConfirmations } from '@/hooks/useTxConfirmations';
 import { useEVMReservationPolling } from '@/hooks/useEVMReservationPolling';
-import { useChainId } from 'wagmi';
+import { useChainId, useAccount } from 'wagmi';
+import { useQueryClient } from '@tanstack/react-query';
 import { Address, formatUnits } from 'viem';
 import { useReservation } from '@/hooks/queries/useReservation';
 import { RESERVATION_STATUS_MAP } from '../history-table/transaction-history-adapter';
 import { useBtcBlockConfirmations } from '@/hooks/useBtcBlockConfirmations';
 import { env } from '@/config/env';
+import { TargetChain } from '@/types/chains';
+import { useLiteforgeEvent } from '@/hooks/useLiteforgeEvent';
 
 interface ReservationTrackerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   id: string;
   txHash: string;
+  targetChain?: TargetChain;
 }
 
 export function ReservationTracker({
@@ -27,12 +31,13 @@ export function ReservationTracker({
   onOpenChange,
   id,
   txHash,
+  targetChain,
 }: ReservationTrackerProps) {
   const [shouldPoll, setShouldPoll] = useState(open);
   const { data } = useReservation(id, {
     refetchInterval: shouldPoll ? 5000 : undefined,
   });
-  const { data: bitcoinPrice } = useBitcoinPrice();
+  const { data: litecoinPrice } = useLitecoinPrice();
   const chainId = useChainId();
   const reservation = data?.data;
 
@@ -43,13 +48,14 @@ export function ReservationTracker({
       isActive: shouldPoll,
     });
 
-  const amount = formatUnits(evmReservation?.tokenAmount || 0n, 8);
+  const amount = formatUnits(evmReservation?.tokenAmount || 0n, 18);
+  const xltcAmount = formatUnits(evmReservation?.tokenAmount || 0n, 18);
 
   const fiatAmount = useMemo(() => {
-    if (!amount || !bitcoinPrice?.bitcoin?.usd) return '0';
-    const usdValue = Number(amount) * bitcoinPrice.bitcoin.usd;
+    if (!amount || !litecoinPrice?.litecoin?.usd) return '0';
+    const usdValue = Number(amount) * litecoinPrice.litecoin.usd;
     return usdValue.toFixed(2);
-  }, [amount, bitcoinPrice?.bitcoin?.usd]);
+  }, [amount, litecoinPrice?.litecoin?.usd]);
 
   const maxConfirmations = Number(env.VITE_EVM_CONFIRMATIONS);
 
@@ -63,8 +69,10 @@ export function ReservationTracker({
     blockNumber: reservation?.originBlockNumber,
   });
 
+  const isLiteforge = targetChain === 'liteforge';
+
   const status = RESERVATION_STATUS_MAP[evmReservation?.status || 0];
-  const bridgingCompleted = status === ReservationStatus.Settled;
+  const bridgingCompleted = status === ReservationStatus.Settled || !!reservation?.targetTxhash;
   const btcReadyToSend =
     Number(fiatAmount) < env.VITE_EVM_CONFIRMATIONS_USD_AMOUNT ||
     confirmations >= maxConfirmations;
@@ -74,20 +82,41 @@ export function ReservationTracker({
     transactionHash: reservation?.targetTxhash,
   });
 
-  useEffect(() => {
-    const should = open && !bridgingCompleted;
-    setShouldPoll(should);
-  }, [bridgingCompleted, open]);
+  const { bridgedEvent } = useLiteforgeEvent({
+    isActive: isLiteforge && bridgingCompleted && shouldPoll,
+    chainId: chainId || 0,
+  });
+  const liteforgeArrived = !!bridgedEvent;
 
-  const maxHeightClass = !bridgingCompleted
+  const queryClient = useQueryClient();
+  const { address } = useAccount();
+
+  useEffect(() => {
+    const should = open && (isLiteforge ? !liteforgeArrived : !bridgingCompleted);
+    setShouldPoll(should);
+  }, [bridgingCompleted, liteforgeArrived, open, isLiteforge]);
+
+  useEffect(() => {
+    if (bridgingCompleted) {
+      queryClient.setQueryData(
+        ['transactions', 'history', address],
+        (old: { reservationId?: string; state?: number }[] | undefined) =>
+          old?.map((item) => item.reservationId === id ? { ...item, state: 4 } : item)
+      );
+    }
+  }, [bridgingCompleted]);
+
+  const maxHeightClass = (isLiteforge ? !liteforgeArrived : !bridgingCompleted)
     ? 'max-h-[90vh] md:h-[813px]'
     : 'max-h-[90vh]';
 
   const btcTransactionDetected =
-    status !== ReservationStatus.Expired &&
-    !!reservation?.targetBlockHash &&
-    reservation.targetBlockNumber &&
-    reservation.targetBlockNumber > 0;
+    bridgingCompleted || (
+      status !== ReservationStatus.Expired &&
+      !!reservation?.originTxhash &&
+      reservation.originBlockNumber &&
+      reservation.originBlockNumber > 0
+    );
 
   return (
     <BaseTransactionTracker
@@ -96,6 +125,8 @@ export function ReservationTracker({
       isLoading={false}
       error={isEVMReservationError}
       maxHeight={maxHeightClass}
+      positionId={reservation?.positionId}
+      reservationId={id}
     >
       {evmReservation && (
         <>
@@ -150,8 +181,8 @@ export function ReservationTracker({
 
           {/* Step 3 - BTC Transaction Detected */}
           <TransactionStep
-            title="BTC transaction detected"
-            description="Your bitcoin transfer was mined."
+            title="LTC transaction detected"
+            description="We need 1 confirmation to make sure the transaction is final."
             status={btcTransactionDetected ? 'completed' : 'pending'}
             completed={!!btcTransactionDetected}
           >
@@ -160,7 +191,7 @@ export function ReservationTracker({
                 data={{
                   amount: amount,
                   txid: reservation?.originTxhash,
-                  confirmations: btcConfirmations,
+                  confirmations: bridgingCompleted ? env.VITE_BTC_CONFIRMATIONS : btcConfirmations,
                   fiatAmount: fiatAmount,
                   maxConfirmations: env.VITE_BTC_CONFIRMATIONS,
                 }}
@@ -172,14 +203,14 @@ export function ReservationTracker({
           {/* Step 4 - Transaction Complete */}
           <TransactionStep
             title="Bridging complete"
-            description="Funds (xBTC) are in your wallet now."
+            description={isLiteforge ? 'zkLTC received on Sepolia.' : 'Funds (zkLTC) are in your wallet now.'}
             status={bridgingCompleted ? 'completed' : 'pending'}
-            isLastStep={true}
+            isLastStep={!isLiteforge}
             completed={bridgingCompleted}
           >
             {bridgingCompleted && (
               <EthCompletionCard
-                amount={amount}
+                amount={xltcAmount}
                 confirmations={targetConfirmations}
                 recipientAddress={evmReservation.bitcoinAddress || ''}
                 reservationTx={
@@ -191,6 +222,36 @@ export function ReservationTracker({
               />
             )}
           </TransactionStep>
+
+          {/* Steps 5 & 6 — Liteforge only */}
+          {isLiteforge && (
+            <>
+              <TransactionStep
+                title="Bridging to Liteforge"
+                description="zkLTC is being sent to Liteforge via the native bridge."
+                status={liteforgeArrived ? 'completed' : bridgingCompleted ? 'current' : 'pending'}
+                completed={liteforgeArrived}
+              />
+
+              <TransactionStep
+                title="Arrived on Liteforge"
+                description="Your zkLTC has arrived at your address on Liteforge."
+                status={liteforgeArrived ? 'completed' : 'pending'}
+                isLastStep={true}
+                completed={liteforgeArrived}
+              >
+                {liteforgeArrived && (
+                  <EthCompletionCard
+                    amount={xltcAmount}
+                    confirmations={0}
+                    recipientAddress={bridgedEvent?.args.l2Recipient || ''}
+                    reservationTx={bridgedEvent?.transactionHash || ''}
+                    type="reservation"
+                  />
+                )}
+              </TransactionStep>
+            </>
+          )}
         </>
       )}
     </BaseTransactionTracker>

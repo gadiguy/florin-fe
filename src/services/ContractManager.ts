@@ -10,11 +10,12 @@ import {
   custom,
 } from 'viem';
 import { getConnectorClient } from '@wagmi/core';
-import { AMMEXCHANGE_ABI, ERC20_BITSNARK_ABI } from '@/constants/abis';
+import { AMMEXCHANGE_ABI, ERC20_BITSNARK_ABI, LITEFORGE_DEPOSITOR_ABI } from '@/constants/abis';
 import { CMError, ContractError, parseContractError } from '@/lib/errors';
 import { TransactionResponse } from '@/types';
 import { Address } from 'viem';
 import { wagmiConfig } from '@/config/wagmi';
+import { supportedChains } from '@/config/evm-chains';
 import { env } from '@/config/env';
 
 export class ContractManager {
@@ -82,9 +83,11 @@ export class ContractManager {
         throw new Error('No chain ID available in connector');
       }
 
+      const knownChain = supportedChains.find((c) => c.id === connectorClient.chain.id);
+      const rpcUrl = knownChain?.rpcUrls.default.http[0] || env.VITE_RPC_URL;
       instance.publicClient = createPublicClient({
         chain: connectorClient.chain,
-        transport: http(env.VITE_RPC_URL),
+        transport: http(rpcUrl),
       });
 
       if (connectorClient?.account) {
@@ -102,6 +105,7 @@ export class ContractManager {
 
       instance.registerContract('AMMExchange', AMMEXCHANGE_ABI);
       instance.registerContract('ERC20BitSnark', ERC20_BITSNARK_ABI);
+      instance.registerContract('LiteforgeDepositor', LITEFORGE_DEPOSITOR_ABI as unknown as []);
       this.instance = instance;
     } catch (error) {
       console.error('Error initializing ContractManager:', error);

@@ -40,26 +40,25 @@ export function stringifyWithBigInt(obj: any): string {
 }
 
 /**
- * Validates a Bitcoin address
- * Supports P2PKH, P2SH, Bech32 (SegWit) addresses
- * @param address Bitcoin address to validate
+ * Validates a Litecoin address
+ * Supports P2WPKH (bech32) and P2TR (bech32m) addresses
+ * @param address Litecoin address to validate
  * @returns true if the address is valid, false otherwise
  */
 export function isValidBitcoinAddress(address: string | undefined): boolean {
   if (!address) return false;
 
-  // P2WPKH (Bech32/SegWit) addresses
-  // Mainnet: starts with bc1q
-  // Testnet: starts with tb1q
-  const p2wpkhRegex = /^(bc1q[a-z0-9]{38,59}|tb1q[a-z0-9]{38,59})$/;
+  // Litecoin bech32 P2WPKH: ltc1q... (mainnet) or tltc1q... (testnet)
+  // Litecoin bech32m P2TR:   ltc1p... (mainnet) or tltc1p... (testnet)
+  const ltcRegex = /^(ltc1[qp][a-z0-9]{38,}|tltc1[qp][a-z0-9]{38,})$/;
 
-  return p2wpkhRegex.test(address);
+  return ltcRegex.test(address);
 }
 
 
 /**
- * Converts a Bitcoin address to a bytes32 value
- * @param address Bitcoin address to convert
+ * Converts a Litecoin address to a bytes32 value
+ * @param address Litecoin address to convert
  * @returns bytes32 value as a hex string
  */
 export function bech32ToBytes32(address: string): `0x${string}` {
@@ -90,10 +89,10 @@ function hexToBytes(hex: string): Uint8Array {
 }
 
 /**
- * Convierte un bytes32 (hex) a una dirección Bech32 Taproot (P2TR)
- * @param bytes32 Valor en hex (con o sin 0x)
- * @param network 'mainnet' o 'testnet' (por defecto 'testnet')
- * @returns Dirección Bech32 (bc1... o tb1...)
+ * Converts a bytes32 (hex) to a Litecoin bech32m Taproot address
+ * @param bytes32 Hex value (with or without 0x)
+ * @param network 'mainnet' or 'testnet' (default: 'testnet')
+ * @returns Litecoin address (ltc1p... or tltc1p...)
  */
 export function bytes32ToBech32Taproot(
   bytes32: string,
@@ -102,7 +101,7 @@ export function bytes32ToBech32Taproot(
   const hex = bytes32.startsWith('0x') ? bytes32.slice(2) : bytes32;
   const data = hexToBytes(hex);
   const words = [1, ...bech32.toWords(data)];
-  const prefix = network === 'mainnet' ? 'bc' : 'tb';
+  const prefix = network === 'mainnet' ? 'ltc' : 'tltc';
   return bech32m.encode(prefix, words);
 }
 
@@ -113,7 +112,7 @@ export function bytes32ToBech32Taproot(
  */
 export function getExplorerUrl(hash: string | undefined): string {
   if (!hash) return '#';
-  
+
   // EVM addresses/transactions start with '0x'
   return hash.startsWith('0x')
     ? ETHERSCAN_URL

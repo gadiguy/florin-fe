@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import bitcoinLogo from '@/assets/bitcoin-logo.png';
+import litecoinLogo from '@/assets/litecoin-logo.png';
 import ethLogo from '@/assets/eth-logo.png';
 
 // Formatter for hash display
@@ -10,8 +10,8 @@ export function formatHash(hash: string = '') {
 // Helper function to get chain logo
 export function getChainLogo(chain: string): string | undefined {
   switch (chain.toLowerCase()) {
-    case 'bitcoin':
-      return bitcoinLogo;
+    case 'litecoin':
+      return litecoinLogo;
     case 'ethereum':
       return ethLogo;
     default:

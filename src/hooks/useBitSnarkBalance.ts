@@ -57,7 +57,7 @@ export const useBitSnarkBalance = () => {
     }
   }, [fetchBalance, chainId, address]);
 
-  const xbtcAmount = balance ? formatUnits(balance, 8) : '0';
+  const xbtcAmount = balance ? formatUnits(balance, 18) : '0';
   return {
     balance: xbtcAmount,
     isLoading,

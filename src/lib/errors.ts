@@ -56,16 +56,17 @@ export enum ErrorCode {
 export const parseContractError = (error: any): string => {
   const message = error?.message || '';
   const knownErrors: Record<string, string> = {
-    [ErrorCode.PositionDoesNotExist]: 'La posición no existe. Verifica el ID.',
-    [ErrorCode.PositionNotActive]: 'La posición no está activa.',
-    [ErrorCode.InvalidAmount]: 'El monto ingresado no es válido.',
-    [ErrorCode.ReservationNotPending]:
-      'La reserva no está en estado pendiente.',
-    [ErrorCode.ReservationExpired]: 'La reserva ha expirado.',
-    [ErrorCode.NotReservationOwner]: 'No sos el dueño de esta reserva.',
-    [ErrorCode.ReservationIdMismatch]: 'El ID de la reserva no coincide.',
-    [ErrorCode.InvalidBitcoinAddress]: 'La dirección de Bitcoin no es válida.',
-    [ErrorCode.TokenTransferFailed]: 'No se pudo transferir el token.',
+    [ErrorCode.ERC20InsufficientBalance]: 'Insufficient zkLTC balance.',
+    [ErrorCode.ERC20InsufficientAllowance]: 'Insufficient zkLTC allowance.',
+    [ErrorCode.PositionDoesNotExist]: 'Position does not exist.',
+    [ErrorCode.PositionNotActive]: 'Position is not active.',
+    [ErrorCode.InvalidAmount]: 'Invalid amount.',
+    [ErrorCode.ReservationNotPending]: 'Reservation is not in pending state.',
+    [ErrorCode.ReservationExpired]: 'Reservation has expired.',
+    [ErrorCode.NotReservationOwner]: 'You are not the reservation owner.',
+    [ErrorCode.ReservationIdMismatch]: 'Reservation ID mismatch.',
+    [ErrorCode.InvalidBitcoinAddress]: 'Invalid Bitcoin address.',
+    [ErrorCode.TokenTransferFailed]: 'Token transfer failed.',
   };
 
   for (const [key, userMessage] of Object.entries(knownErrors)) {
@@ -75,6 +76,6 @@ export const parseContractError = (error: any): string => {
   return (
     error?.shortMessage ||
     message ||
-    'Error inesperado al interactuar con el contrato'
+    'Unexpected error interacting with the contract'
   );
 };

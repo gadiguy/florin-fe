@@ -13,8 +13,22 @@ import { Address, formatEther } from 'viem';
 import { CONTRACTS_ADDRESS } from '@/constants/contracts';
 import { ContractManager } from '@/services/ContractManager';
 import { bech32ToBytes32, bytes32ToBech32Taproot } from '@/lib/utils';
-import { DEFAULT_POSITION_ID } from '@/constants';
 import { AMMEXCHANGE_ABI } from '@/constants/abis';
+
+function parseContractError(error: unknown): string {
+  const message = (error as Error)?.message ?? '';
+  if (
+    message.includes('insufficient funds') ||
+    message.includes('exceeds the balance') ||
+    message.includes('InsufficientFunds')
+  ) {
+    return 'Insufficient ETH to cover gas fees. Please add ETH to your wallet and try again.';
+  }
+  if (message.includes('User rejected') || message.includes('user rejected')) {
+    return 'Transaction cancelled.';
+  }
+  return message;
+}
 
 export const useExchange = () => {
   const [loading, setLoading] = useState(false);
@@ -50,7 +64,7 @@ export const useExchange = () => {
         address: contractAddress,
         abi: AMMEXCHANGE_ABI,
         functionName: 'reservePosition',
-        args: [DEFAULT_POSITION_ID, owner, tokenAmount],
+        args: [CONTRACTS_ADDRESS[chainId as keyof typeof CONTRACTS_ADDRESS].defaultPositionId, owner, tokenAmount],
         account: owner,
         value: 0n,
       });
@@ -93,6 +107,16 @@ export const useExchange = () => {
         chainId as keyof typeof CONTRACTS_ADDRESS
       ].erc20BitSnark as Address;
 
+      const balance = await contractManager.readContract(
+        'ERC20BitSnark',
+        'balanceOf',
+        [owner],
+        tokenAddress
+      ) as unknown as bigint;
+      if (balance < tokenAmount) {
+        throw new Error('Insufficient zkLTC balance.');
+      }
+
       const tokenName = await contractManager.readContract(
         'ERC20BitSnark',
         'name',
@@ -100,7 +124,6 @@ export const useExchange = () => {
         tokenAddress
       );
 
-      
       const nonce = await contractManager.readContract(
         'ERC20BitSnark',
         'nonces',
@@ -110,6 +133,7 @@ export const useExchange = () => {
       const domain = {
         name: tokenName,
         version: '1',
+        chainId,
         verifyingContract: tokenAddress,
       };
       const types = {
@@ -181,7 +205,7 @@ export const useExchange = () => {
       return newPosition;
     } catch (error) {
       setLoading(false);
-      setError((error as Error).message);
+      setError(parseContractError(error));
       console.log('openPosition error', error);
     }
   };
@@ -206,7 +230,7 @@ export const useExchange = () => {
         chainId as keyof typeof CONTRACTS_ADDRESS
       ].erc20BitSnark as Address;
 
-      const positionId = DEFAULT_POSITION_ID;
+      const positionId = CONTRACTS_ADDRESS[chainId as keyof typeof CONTRACTS_ADDRESS].defaultPositionId;
       const contractAddress = CONTRACTS_ADDRESS[
         chainId as keyof typeof CONTRACTS_ADDRESS
       ].ammExchange as Address;
@@ -229,11 +253,14 @@ export const useExchange = () => {
         receivedAmount: '0',
       };
 
+      console.log('[reservePosition] receipt.logs:', receipt?.logs);
+      console.log('[reservePosition] receipt.receipt.logs:', receipt?.receipt?.logs);
       const reservationId = receipt?.logs
-        ? receipt?.logs[0].args.reservationId
+        ? receipt.logs.find((l: { args?: { reservationId?: string } }) => l.args?.reservationId)?.args?.reservationId
         : '';
+      console.log('[reservePosition] extracted reservationId:', reservationId);
       if (!reservationId) {
-        throw new Error('Reservation ID not found');
+        throw new Error('Reservation ID not found in receipt logs');
       }
       const newReservation: Reservation = {
         positionId: positionId,
@@ -252,7 +279,7 @@ export const useExchange = () => {
       return newReservation;
     } catch (error) {
       setLoading(false);
-      setError((error as Error).message);
+      setError(parseContractError(error));
       console.log('reservePosition error', error);
     }
   };
@@ -281,7 +308,7 @@ export const useExchange = () => {
       return position;
     } catch (error) {
       setLoading(false);
-      setError((error as Error).message);
+      setError(parseContractError(error));
       console.error('getPosition error:', error);
       throw error;
     }
@@ -316,7 +343,7 @@ export const useExchange = () => {
       };
     } catch (error) {
       setLoading(false);
-      setError((error as Error).message);
+      setError(parseContractError(error));
       console.error('getReservation error:', error);
       throw error;
     }

@@ -4,7 +4,7 @@ const envSchema = z.object({
   VITE_WALLETCONNECT_PROJECT_ID: z.string().min(1, {
     message: 'VITE_WALLETCONNECT_PROJECT_ID is required',
   }),
-  VITE_RPC_URL: z.string().min(1, { message: 'VITE_RPC_URL is required' }),
+  VITE_RPC_URL: z.string().optional().default(''),
   VITE_API_BASE_URL: z.string().min(1, {
     message: 'VITE_API_BASE_URL is required',
   }),
@@ -28,9 +28,6 @@ const envSchema = z.object({
   }),
   VITE_BTC_CONFIRMATIONS: z.string().transform((val) => Number(val)).refine((val) => val > 0, {
     message: 'VITE_BTC_CONFIRMATIONS must be greater than 0',
-  }),
-  VITE_DEFAULT_POSITION_ID: z.string().min(1, {
-    message: 'VITE_DEFAULT_POSITION_ID is required',
   }),
 });
 

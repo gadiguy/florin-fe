@@ -7,7 +7,7 @@ import { Button } from '../ui/button';
 import { isValidBitcoinAddress } from '@/lib/utils';
 import { Network, Currency } from './types';
 import { useChainId } from 'wagmi';
-import { Address, parseEther, parseUnits } from 'viem';
+import { Address, parseEther } from 'viem';
 import { useExchange } from '@/hooks/useExchange';
 import { Position, Reservation } from '@/types';
 import { useMaxMinBtc } from '@/hooks/queries/useMaxMinBtc';
@@ -15,12 +15,15 @@ import { useBitSnarkBalance } from '@/hooks/useBitSnarkBalance';
 import { useAccount } from 'wagmi';
 import { useSupportedChains } from '@/hooks/useSupportedChains';
 import { useToast } from '@/hooks/useToast';
+import { TargetChain } from '@/types/chains';
+import { CONTRACTS_ADDRESS } from '@/constants/contracts';
 
 interface TransferTabProps {
   onTransactionCreated: (
     type: 'position' | 'reservation',
     id: string,
-    txHash: string
+    txHash: string,
+    targetChain?: TargetChain
   ) => void;
 }
 
@@ -43,6 +46,7 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
     undefined
   );
   const [estimatedGasFee, setEstimatedGasFee] = useState<number>(0);
+  const [targetChain, setTargetChain] = useState<TargetChain>('sepolia');
   const { isSupported } = useSupportedChains();
   const {
     openPosition,
@@ -137,12 +141,17 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
 
   const handleBridgeFunds = async () => {
     const normalizedAmount = fromAmount.replace(',', '.');
-    const parsedAmount = parseUnits(normalizedAmount, 8);
+    const parsedAmount = parseEther(normalizedAmount);
     let transaction: Position | Reservation | undefined;
     if (fromNetwork === 'bitcoin') {
+      const contracts = CONTRACTS_ADDRESS[chainId as keyof typeof CONTRACTS_ADDRESS];
+      const evmReceivingAddress: Address =
+        targetChain === 'liteforge'
+          ? (contracts as { liteforgeDepositor?: string }).liteforgeDepositor as Address
+          : address!;
       transaction = await reservePosition({
         tokenAmount: parsedAmount,
-        evmReceivingAddress: address!,
+        evmReceivingAddress,
         chainId,
         owner: address!,
       });
@@ -162,7 +171,8 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
         fromNetwork === 'ethereum'
           ? (transaction as Position)?.positionId
           : (transaction as Reservation)?.reservationId,
-        transaction.hash
+        transaction.hash,
+        fromNetwork === 'bitcoin' ? targetChain : undefined
       );
     }
   };
@@ -206,6 +216,8 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
         ethWalletAddress={address}
         bitcoinAddress={bitcoinAddress}
         bitcoinAddressValid={isBitcoinAddressValid}
+        targetChain={targetChain}
+        onTargetChainChange={setTargetChain}
         handleSwitchNetworks={handleSwitchNetworks}
         handleFromAmountChange={handleFromAmountChange}
         handleToAmountChange={handleToAmountChange}
