@@ -79,6 +79,9 @@ export function ReservationTracker({
     !!reservation?.liteforgeTxhash ||
     (!!reservation?.ownerAddress && reservation.ownerAddress.toLowerCase() === depositorAddress);
 
+  const ownerAddress = evmReservation?.ownerAddress || reservation?.ownerAddress || '';
+  const bitcoinAddress = evmReservation?.bitcoinAddress || reservation?.bitcoinAddress || '';
+  const reservationIdStr = evmReservation?.reservationId || id;
   const status = RESERVATION_STATUS_MAP[evmReservation?.status || 0];
   const bridgingCompleted = status === ReservationStatus.Settled || !!reservation?.targetTxhash;
   const btcReadyToSend =
@@ -149,7 +152,7 @@ export function ReservationTracker({
             <BtcTransactionCard
               data={{
                 amount: amount,
-                recipientAddress: evmReservation.ownerAddress,
+                recipientAddress: ownerAddress,
                 reservationTx: txHash,
                 confirmations: confirmations,
                 fiatAmount: fiatAmount,
@@ -163,17 +166,17 @@ export function ReservationTracker({
             amount={amount}
             isSent={bridgingCompleted}
             isReadyToSend={btcReadyToSend}
-            recipientAddress={evmReservation.bitcoinAddress}
+            recipientAddress={bitcoinAddress}
             state={status}
             reservation={{
               ...reservation,
               amount: amount,
               state: status,
-              bitcoinAddress: evmReservation.bitcoinAddress,
+              bitcoinAddress: bitcoinAddress,
               hash: txHash,
               targetTxhash: reservation?.targetTxhash,
               reservationId: evmReservation.reservationId,
-              ownerAddress: evmReservation.ownerAddress,
+              ownerAddress: ownerAddress,
               tokenAddress: 'token adrress' as Address,
               finality: Finality.UNKNOWN,
               createdAt: reservation?.createdAt || '',
@@ -220,7 +223,7 @@ export function ReservationTracker({
               <EthCompletionCard
                 amount={xltcAmount}
                 confirmations={targetConfirmations}
-                recipientAddress={evmReservation.bitcoinAddress || ''}
+                recipientAddress={bitcoinAddress || ''}
                 reservationTx={
                   reservation?.targetTxhash ||
                   reservation?.targetBlockHash ||
