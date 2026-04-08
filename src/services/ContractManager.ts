@@ -164,6 +164,12 @@ export class ContractManager {
     }
   }
 
+  public static async reinitializeIfExists(): Promise<void> {
+    if (this.instance) {
+      await this.instance.reinitialize();
+    }
+  }
+
   public async reinitialize(): Promise<void> {
     const connectorClient = await getConnectorClient(wagmiConfig);
     if (!connectorClient?.chain?.id) {

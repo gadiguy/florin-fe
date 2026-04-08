@@ -10,6 +10,7 @@ import { useChainId } from 'wagmi';
 import { Address, parseEther } from 'viem';
 import { useExchange } from '@/hooks/useExchange';
 import { useLiteforgeSwap } from '@/hooks/useLiteforgeSwap';
+import { useChainForDirection } from '@/hooks/useChainForDirection';
 import { Reservation } from '@/types';
 import { useMaxMinBtc } from '@/hooks/queries/useMaxMinBtc';
 import { useBitSnarkBalance } from '@/hooks/useBitSnarkBalance';
@@ -32,6 +33,7 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
   const { address } = useAccount();
   const chainId = useChainId();
   const [isLiteforgeMode, setIsLiteforgeMode] = useState(false);
+  const { isCorrectChain, isSwitching, switchToCorrectChain } = useChainForDirection(isLiteforgeMode);
   const [fromNetwork, setFromNetwork] = useState<Network>('bitcoin');
   const [toNetwork, setToNetwork] = useState<Network>('liteforge');
   const [fromCurrency, setFromCurrency] = useState<Currency>('btc');
@@ -67,6 +69,7 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
 
   const handleDirectionChange = (mode: 'ltc-to-liteforge' | 'liteforge-to-ltc') => {
     if (isAnimating) return;
+    const targetIsLiteforge = mode === 'liteforge-to-ltc';
     setIsAnimating(true);
     setTimeout(() => {
       if (mode === 'ltc-to-liteforge') {
@@ -86,6 +89,10 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
       setToAmount('0');
       setBitcoinAddress(undefined);
       setTermsAccepted(false);
+
+      // Trigger chain switch after state update
+      switchToCorrectChain(targetIsLiteforge);
+
       setTimeout(() => setIsAnimating(false), 300);
     }, 300);
   };
@@ -171,6 +178,8 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
   const disabled =
     !termsAccepted ||
     loading ||
+    isSwitching ||
+    !isCorrectChain ||
     (isLiteforgeMode && (!bitcoinAddress || !isBitcoinAddressValid)) ||
     (!isLiteforgeMode && (Number(fromAmount) < minBtc || Number(fromAmount) > maxBtc));
 
@@ -180,6 +189,12 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
     setToAmount('0');
     setBitcoinAddress(undefined);
     setTermsAccepted(false);
+  };
+
+  const getButtonLabel = () => {
+    if (isSwitching) return 'Switching network...';
+    if (!isCorrectChain) return 'Switch network';
+    return isLiteforgeMode ? 'Swap to LTC' : 'Bridge to Liteforge';
   };
 
   return (
@@ -227,14 +242,14 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
         />
         {isWalletConnected && isSupported && (
           <Button
-            onClick={handleBridgeAndReset}
+            onClick={!isCorrectChain ? () => switchToCorrectChain(isLiteforgeMode) : handleBridgeAndReset}
             isAnimating={isAnimating}
             variant="orange"
             size="custom"
-            disabled={disabled}
-            loading={loading}
+            disabled={isSwitching || (!isCorrectChain ? false : disabled)}
+            loading={loading || isSwitching}
           >
-            {isLiteforgeMode ? 'Swap to LTC' : 'Bridge to Liteforge'}
+            {getButtonLabel()}
           </Button>
         )}
       </div>

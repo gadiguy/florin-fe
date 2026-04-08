@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { switchChain, getConnectorClient } from '@wagmi/core';
+import { getConnectorClient } from '@wagmi/core';
 import { createWalletClient, createPublicClient, custom, http } from 'viem';
 import { wagmiConfig } from '@/config/wagmi';
 import { CONTRACTS_ADDRESS } from '@/constants/contracts';
@@ -38,10 +38,7 @@ export const useLiteforgeSwap = () => {
       const contractAddress = (contracts as { liteforgeSwap: string }).liteforgeSwap as `0x${string}`;
       const ltcAddressBytes32 = bech32ToBytes32(ltcAddress);
 
-      // Switch wallet to Liteforge
-      await switchChain(wagmiConfig, { chainId: ChainId.LiteforgeTestnet });
-
-      // Get the connector transport and build viem clients directly for Liteforge
+      // Wallet should already be on Liteforge (switched by direction selector)
       const connectorClient = await getConnectorClient(wagmiConfig);
       const walletClient = createWalletClient({
         account: connectorClient.account,
@@ -53,7 +50,6 @@ export const useLiteforgeSwap = () => {
         transport: http(liteforgeTestnet.rpcUrls.default.http[0]),
       });
 
-      // Simulate then send
       const { request } = await publicClient.simulateContract({
         address: contractAddress,
         abi: LITEFORGE_SWAP_ABI,
