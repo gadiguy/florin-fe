@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { writeContract, waitForTransactionReceipt } from '@wagmi/core';
+import { writeContract, waitForTransactionReceipt, switchChain } from '@wagmi/core';
 import { wagmiConfig } from '@/config/wagmi';
 import { CONTRACTS_ADDRESS } from '@/constants/contracts';
 import { LITEFORGE_SWAP_ABI } from '@/constants/abis';
 import { ChainId } from '@/types/chains';
 import { bech32ToBytes32 } from '@/lib/utils';
-import { liteforgeTestnet } from '@/config/evm-chains';
 
 function parseContractError(error: unknown): string {
   const message = (error as Error)?.message ?? '';
@@ -37,8 +36,10 @@ export const useLiteforgeSwap = () => {
       const contractAddress = (contracts as { liteforgeSwap: string }).liteforgeSwap as `0x${string}`;
       const ltcAddressBytes32 = bech32ToBytes32(ltcAddress);
 
+      // Switch to Liteforge first, then send the tx on that chain
+      await switchChain(wagmiConfig, { chainId: ChainId.LiteforgeTestnet });
+
       const hash = await writeContract(wagmiConfig, {
-        chain: liteforgeTestnet,
         address: contractAddress,
         abi: [...LITEFORGE_SWAP_ABI],
         functionName: 'swap',
