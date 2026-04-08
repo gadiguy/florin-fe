@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { writeContract, waitForTransactionReceipt, switchChain } from '@wagmi/core';
+import { switchChain, getConnectorClient } from '@wagmi/core';
+import { createWalletClient, createPublicClient, custom, http } from 'viem';
 import { wagmiConfig } from '@/config/wagmi';
 import { CONTRACTS_ADDRESS } from '@/constants/contracts';
 import { LITEFORGE_SWAP_ABI } from '@/constants/abis';
 import { ChainId } from '@/types/chains';
+import { liteforgeTestnet } from '@/config/evm-chains';
 import { bech32ToBytes32 } from '@/lib/utils';
 
 function parseContractError(error: unknown): string {
@@ -36,19 +38,33 @@ export const useLiteforgeSwap = () => {
       const contractAddress = (contracts as { liteforgeSwap: string }).liteforgeSwap as `0x${string}`;
       const ltcAddressBytes32 = bech32ToBytes32(ltcAddress);
 
-      // Switch to Liteforge first, then send the tx on that chain
+      // Switch wallet to Liteforge
       await switchChain(wagmiConfig, { chainId: ChainId.LiteforgeTestnet });
 
-      const hash = await writeContract(wagmiConfig, {
+      // Get the connector transport and build viem clients directly for Liteforge
+      const connectorClient = await getConnectorClient(wagmiConfig);
+      const walletClient = createWalletClient({
+        account: connectorClient.account,
+        chain: liteforgeTestnet,
+        transport: custom(connectorClient.transport),
+      });
+      const publicClient = createPublicClient({
+        chain: liteforgeTestnet,
+        transport: http(liteforgeTestnet.rpcUrls.default.http[0]),
+      });
+
+      // Simulate then send
+      const { request } = await publicClient.simulateContract({
         address: contractAddress,
-        abi: [...LITEFORGE_SWAP_ABI],
+        abi: LITEFORGE_SWAP_ABI,
         functionName: 'swap',
         args: [ltcAddressBytes32],
         value: amount,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+        account: walletClient.account,
+      });
 
-      await waitForTransactionReceipt(wagmiConfig, { hash, confirmations: 1 });
+      const hash = await walletClient.writeContract(request);
+      await publicClient.waitForTransactionReceipt({ hash, confirmations: 1 });
 
       setLoading(false);
       return { txHash: hash };
