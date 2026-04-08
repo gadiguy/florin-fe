@@ -90,11 +90,13 @@ export function ReservationTracker({
     transactionHash: reservation?.targetTxhash,
   });
 
+  // If the BE already has the liteforge tx hash, the bridge is done — no need to poll
+  const liteforgeAlreadyBridged = !!reservation?.liteforgeTxhash;
   const { bridgedEvent } = useLiteforgeEvent({
-    isActive: isLiteforge && bridgingCompleted && shouldPoll,
+    isActive: isLiteforge && bridgingCompleted && !liteforgeAlreadyBridged && shouldPoll,
     chainId: sepolia.id,
   });
-  const liteforgeArrived = !!bridgedEvent;
+  const liteforgeArrived = liteforgeAlreadyBridged || !!bridgedEvent;
 
   const queryClient = useQueryClient();
   const { address } = useAccount();
