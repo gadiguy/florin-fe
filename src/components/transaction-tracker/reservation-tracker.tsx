@@ -8,7 +8,7 @@ import { useLitecoinPrice } from '@/hooks/useLitecoinPrice';
 import { useMemo, useState, useEffect } from 'react';
 import { useTxConfirmations } from '@/hooks/useTxConfirmations';
 import { useEVMReservationPolling } from '@/hooks/useEVMReservationPolling';
-import { useChainId, useAccount } from 'wagmi';
+import { useAccount } from 'wagmi';
 import { useQueryClient } from '@tanstack/react-query';
 import { Address, formatUnits } from 'viem';
 import { useReservation } from '@/hooks/queries/useReservation';
@@ -40,13 +40,13 @@ export function ReservationTracker({
     refetchInterval: shouldPoll ? 5000 : undefined,
   });
   const { data: litecoinPrice } = useLitecoinPrice();
-  const chainId = useChainId();
   const reservation = data?.data;
 
-  const { evmReservation, error: isEVMReservationError } =
+  // Always poll on Sepolia — reservations live there regardless of current wallet chain
+  const { evmReservation } =
     useEVMReservationPolling({
       reservationId: id || '',
-      chainId: chainId || 0,
+      chainId: sepolia.id,
       isActive: shouldPoll,
     });
 
@@ -90,7 +90,7 @@ export function ReservationTracker({
 
   const { bridgedEvent } = useLiteforgeEvent({
     isActive: isLiteforge && bridgingCompleted && shouldPoll,
-    chainId: chainId || 0,
+    chainId: sepolia.id,
   });
   const liteforgeArrived = !!bridgedEvent;
 
@@ -129,7 +129,7 @@ export function ReservationTracker({
       open={open}
       onOpenChange={onOpenChange}
       isLoading={false}
-      error={isEVMReservationError}
+      error={null}
       maxHeight={maxHeightClass}
       positionId={reservation?.positionId}
       reservationId={id}
@@ -175,7 +175,7 @@ export function ReservationTracker({
               tokenAddress: 'token adrress' as Address,
               finality: Finality.UNKNOWN,
               createdAt: reservation?.createdAt || '',
-              chainId: chainId || 0,
+              chainId: sepolia.id,
               contractRegistrationTxHash:
                 reservation?.contractRegistrationTxHash || '',
               targetChain: reservation?.targetChain,
