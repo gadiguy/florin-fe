@@ -7,6 +7,7 @@ import { FlorinApiService } from '@/services/Api';
 import { useTxConfirmations } from '@/hooks/useTxConfirmations';
 import { EthTransactionCard } from './eth-transaction-card';
 import { env } from '@/config/env';
+import { formatUnits } from 'viem';
 
 interface LiteforgeSwapTrackerProps {
   open: boolean;
@@ -30,6 +31,7 @@ export function LiteforgeSwapTracker({
 
   const ltcSent = swapData?.state === 'ltc_sent' || swapData?.state === 'completed';
   const ltcArrived = swapData?.state === 'completed';
+  const formattedAmount = swapData?.amount ? formatUnits(BigInt(swapData.amount), 18) : '0';
 
   const confirmations = useTxConfirmations({
     isActive: open,
@@ -64,7 +66,7 @@ export function LiteforgeSwapTracker({
       >
         <EthTransactionCard
           data={{
-            amount: swapData?.amount || '0',
+            amount: formattedAmount,
             fiatAmount: '',
             reservationTx: txHash,
             confirmations,
@@ -91,7 +93,7 @@ export function LiteforgeSwapTracker({
       >
         {ltcArrived && (
           <BtcCompletionCard
-            amount={swapData?.amount || '0'}
+            amount={formattedAmount}
             recipientAddress={swapData?.ltcAddress || ''}
             reservationTx={txHash}
             confirmations={1}

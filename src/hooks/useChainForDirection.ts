@@ -53,18 +53,18 @@ export function useChainForDirection(isLiteforgeMode: boolean) {
       if (!provider) return;
 
       setIsSwitching(true);
+      const hexChainId = `0x${targetChainId.toString(16)}`;
       try {
-        const hexChainId = `0x${targetChainId.toString(16)}`;
         await provider.request({
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: hexChainId }],
         });
+        setCurrentChainId(targetChainId);
       } catch (err: unknown) {
-        // Error 4902: chain not added to wallet yet — add it
+        // Error 4902: chain not added to wallet yet — add it then switch
         if ((err as { code?: number }).code === 4902) {
           const chain = targetIsLiteforge ? liteforgeTestnet : sepolia;
           try {
-            const hexChainId = `0x${targetChainId.toString(16)}`;
             await provider.request({
               method: 'wallet_addEthereumChain',
               params: [{
@@ -75,11 +75,11 @@ export function useChainForDirection(isLiteforgeMode: boolean) {
                 blockExplorerUrls: [chain.blockExplorers?.default.url],
               }],
             });
-            // After adding, switch to it
             await provider.request({
               method: 'wallet_switchEthereumChain',
               params: [{ chainId: hexChainId }],
             });
+            setCurrentChainId(targetChainId);
           } catch (addErr) {
             console.error('Failed to add chain:', addErr);
           }
