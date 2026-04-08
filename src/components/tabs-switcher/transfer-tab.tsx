@@ -100,7 +100,7 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
   };
 
   const updateGasEstimate = async () => {
-    if (!address || !chainId || !fromAmount || fromAmount === '0' || isLiteforgeMode) {
+    if (!address || !chainId || !fromAmount || fromAmount === '0' || isLiteforgeMode || !isCorrectChain) {
       setEstimatedGasFee(0);
       return;
     }

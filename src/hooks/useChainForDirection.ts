@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useSwitchChain, useChainId, useAccount } from 'wagmi';
+import { useSwitchChain, useAccount } from 'wagmi';
 import { ChainId } from '@/types/chains';
 import { ContractManager } from '@/services/ContractManager';
 
@@ -8,8 +8,7 @@ function getRequiredChainId(isLiteforgeMode: boolean): number {
 }
 
 export function useChainForDirection(isLiteforgeMode: boolean) {
-  const chainId = useChainId();
-  const { isConnected } = useAccount();
+  const { isConnected, chainId } = useAccount();
   const { switchChainAsync } = useSwitchChain();
   const [isSwitching, setIsSwitching] = useState(false);
 
