@@ -50,8 +50,10 @@ export function ReservationTracker({
       isActive: shouldPoll,
     });
 
-  const amount = formatUnits(evmReservation?.tokenAmount || 0n, 18);
-  const xltcAmount = formatUnits(evmReservation?.tokenAmount || 0n, 18);
+  const amount = evmReservation
+    ? formatUnits(evmReservation.tokenAmount || 0n, 18)
+    : reservation?.amount || '0';
+  const xltcAmount = amount;
 
   const fiatAmount = useMemo(() => {
     if (!amount || !litecoinPrice?.litecoin?.usd) return '0';
@@ -134,7 +136,7 @@ export function ReservationTracker({
       positionId={reservation?.positionId}
       reservationId={id}
     >
-      {evmReservation && (
+      {(evmReservation || reservation) && (
         <>
           {/* Step 1 - Request Transfer */}
           <TransactionStep
