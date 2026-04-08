@@ -15,7 +15,7 @@ export const AmountInputHeader = ({
 }: AmountInputHeaderProps) => {
   const networkLogoSrc = ASSETS.NETWORK_LOGOS[network];
   const bgColor = network === 'bitcoin' ? 'bg-bitcoin-bg' : 'bg-ethereum-bg';
-  const label = network === 'bitcoin' || network === 'liteforge' ? 'From' : 'To';
+  const label = network === 'bitcoin' ? 'From' : 'To';
 
   const formattedAmount = xbtcAmount 
     ? Number(xbtcAmount).toLocaleString('en-US', {
