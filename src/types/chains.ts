@@ -7,8 +7,7 @@ export enum ChainId {
   BaseSepolia = 84532,
   ModeSepolia = 919,
   Hardhat = 31337,
-  // TODO: update with real chain ID once liteforge-swap-deployment.json is available
-  LiteforgeTestnet = 1750,
+  LiteforgeTestnet = 4441,
 }
 
 export type TargetChain = 'liteforge';
