@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { writeContract, waitForTransactionReceipt, switchChain, getAccount } from '@wagmi/core';
+import { writeContract, waitForTransactionReceipt } from '@wagmi/core';
 import { wagmiConfig } from '@/config/wagmi';
 import { CONTRACTS_ADDRESS } from '@/constants/contracts';
 import { LITEFORGE_SWAP_ABI } from '@/constants/abis';
@@ -36,12 +36,6 @@ export const useLiteforgeSwap = () => {
       const contracts = CONTRACTS_ADDRESS[ChainId.LiteforgeTestnet as keyof typeof CONTRACTS_ADDRESS];
       const contractAddress = (contracts as { liteforgeSwap: string }).liteforgeSwap as `0x${string}`;
       const ltcAddressBytes32 = bech32ToBytes32(ltcAddress);
-
-      // Ensure we're on Liteforge chain
-      const account = getAccount(wagmiConfig);
-      if (account.chainId !== ChainId.LiteforgeTestnet) {
-        await switchChain(wagmiConfig, { chainId: ChainId.LiteforgeTestnet });
-      }
 
       const hash = await writeContract(wagmiConfig, {
         chain: liteforgeTestnet,
