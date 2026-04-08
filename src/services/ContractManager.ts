@@ -161,7 +161,28 @@ export class ContractManager {
       }
     } catch (error) {
       console.error('Error refreshing wallet client:', error);
-      // No lanzamos el error para permitir operaciones de solo lectura
+    }
+  }
+
+  public async reinitialize(): Promise<void> {
+    const connectorClient = await getConnectorClient(wagmiConfig);
+    if (!connectorClient?.chain?.id) {
+      throw new Error('No chain ID available in connector');
+    }
+
+    const knownChain = supportedChains.find((c) => c.id === connectorClient.chain.id);
+    const rpcUrl = knownChain?.rpcUrls.default.http[0] || env.VITE_RPC_URL;
+    this.publicClient = createPublicClient({
+      chain: connectorClient.chain,
+      transport: http(rpcUrl),
+    });
+
+    if (connectorClient?.account) {
+      this.walletClient = createWalletClient({
+        account: connectorClient.account,
+        chain: connectorClient.chain,
+        transport: custom(connectorClient.transport),
+      });
     }
   }
 

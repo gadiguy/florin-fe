@@ -10,6 +10,7 @@ import { useChainId, useSwitchChain } from 'wagmi';
 import { Address, parseEther } from 'viem';
 import { useExchange } from '@/hooks/useExchange';
 import { useLiteforgeSwap } from '@/hooks/useLiteforgeSwap';
+import { ContractManager } from '@/services/ContractManager';
 import { Reservation } from '@/types';
 import { useMaxMinBtc } from '@/hooks/queries/useMaxMinBtc';
 import { useBitSnarkBalance } from '@/hooks/useBitSnarkBalance';
@@ -139,6 +140,8 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
 
     if (isLiteforgeMode) {
       await switchChain({ chainId: ChainId.LiteforgeTestnet });
+      const cm = await ContractManager.getInstance();
+      await cm.reinitialize();
       const result = await liteforgeSwap({ ltcAddress: bitcoinAddress!, amount: parsedAmount });
       if (result) {
         onTransactionCreated('liteforge-swap', result.txHash, result.txHash);
