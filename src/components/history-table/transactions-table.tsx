@@ -26,6 +26,7 @@ import { useState } from 'react';
 import { useTransactions } from '@/hooks/useTransactions';
 import { TransactionNormalized } from './transaction-history-adapter';
 import { useSupportedChains } from '@/hooks/useSupportedChains';
+import { TargetChain } from '@/types/chains';
 
 /**
  * Transactions history table component
@@ -43,6 +44,7 @@ export default function TransactionsTable() {
     id: string;
     type: 'reservation' | 'position';
     txHash: string;
+    targetChain?: TargetChain;
   } | null>(null);
   const [openTrackerDialog, setOpenTrackerDialog] = useState(false);
   const { isSupported } = useSupportedChains();
@@ -181,6 +183,7 @@ export default function TransactionsTable() {
         type={transactionToTrack?.type || 'reservation'}
         id={transactionToTrack?.id || ''}
         txHash={transactionToTrack?.txHash || ''}
+        targetChain={transactionToTrack?.targetChain}
       />
     </>
   );

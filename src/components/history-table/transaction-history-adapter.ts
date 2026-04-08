@@ -32,6 +32,7 @@ export interface TransactionNormalized {
   receivedAmount?: string;
   targetTxhash?: string;
   targetBlockNumber?: number;
+  targetChain?: number;
 }
 
 export const POSITION_STATUS_MAP = [
@@ -110,5 +111,6 @@ export function transactionHistoryAdapter(
     originTxHash: item.originTxhash,
     targetTxhash: item.targetTxhash || '',
     targetBlockNumber: item.targetBlockNumber,
+    targetChain: item.targetChain,
   };
 }

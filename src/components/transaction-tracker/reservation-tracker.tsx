@@ -17,6 +17,8 @@ import { useBtcBlockConfirmations } from '@/hooks/useBtcBlockConfirmations';
 import { env } from '@/config/env';
 import { TargetChain } from '@/types/chains';
 import { useLiteforgeEvent } from '@/hooks/useLiteforgeEvent';
+import { CONTRACTS_ADDRESS } from '@/constants/contracts';
+import { sepolia } from '@/config/evm-chains';
 
 interface ReservationTrackerProps {
   open: boolean;
@@ -69,7 +71,11 @@ export function ReservationTracker({
     blockNumber: reservation?.originBlockNumber,
   });
 
-  const isLiteforge = targetChain === 'liteforge';
+  const depositorAddress = (CONTRACTS_ADDRESS[sepolia.id] as { liteforgeDepositor?: string }).liteforgeDepositor?.toLowerCase();
+  const isLiteforge =
+    targetChain === 'liteforge' ||
+    !!reservation?.liteforgeTxhash ||
+    (!!reservation?.ownerAddress && reservation.ownerAddress.toLowerCase() === depositorAddress);
 
   const status = RESERVATION_STATUS_MAP[evmReservation?.status || 0];
   const bridgingCompleted = status === ReservationStatus.Settled || !!reservation?.targetTxhash;
@@ -202,7 +208,7 @@ export function ReservationTracker({
 
           {/* Step 4 - Transaction Complete */}
           <TransactionStep
-            title="Bridging complete"
+            title="Funds on L1"
             description={isLiteforge ? 'zkLTC received on Sepolia.' : 'Funds (zkLTC) are in your wallet now.'}
             status={bridgingCompleted ? 'completed' : 'pending'}
             isLastStep={!isLiteforge}

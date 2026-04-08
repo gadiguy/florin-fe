@@ -1,12 +1,10 @@
 import { AmountInput } from '@/components/amount-input';
 import { Input } from '@/components/ui/input';
 import { Label } from '@radix-ui/react-label';
-import switchArrows from '@/assets/switch-arrows.svg';
 import { cn } from '@/lib/utils';
 import { Address } from 'viem';
 import { useBitcoinPrice } from '@/hooks/useBitcoinPrice';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
-import { TargetChain, TARGET_CHAIN_LABELS } from '@/types/chains';
 import { Network } from './types';
 
 interface TransferFormProps {
@@ -22,16 +20,13 @@ interface TransferFormProps {
   ethWalletAddress?: Address;
   bitcoinAddress?: string;
   bitcoinAddressValid?: boolean;
-  targetChain: TargetChain;
-  onTargetChainChange: (chain: TargetChain) => void;
-  handleSwitchNetworks: () => void;
+  isLiteforgeMode: boolean;
+  onDirectionChange: (mode: 'ltc-to-liteforge' | 'liteforge-to-ltc') => void;
   handleFromAmountChange: (value: string) => void;
   handleToAmountChange: (value: string) => void;
   setBitcoinAddress: (value: Address | undefined) => void;
   maxBtc: number;
   minBtc: number;
-  onSelectLiteforgeMode: () => void;
-  onExitLiteforgeMode: () => void;
 }
 
 export function TransferForm({
@@ -47,27 +42,49 @@ export function TransferForm({
   ethWalletAddress,
   bitcoinAddress,
   bitcoinAddressValid = true,
-  targetChain,
-  onTargetChainChange,
-  handleSwitchNetworks,
+  isLiteforgeMode,
+  onDirectionChange,
   handleFromAmountChange,
   handleToAmountChange,
   setBitcoinAddress,
   maxBtc,
   minBtc,
-  onSelectLiteforgeMode,
-  onExitLiteforgeMode,
 }: TransferFormProps) {
   const { data: bitcoinPrice } = useBitcoinPrice();
   const isFromXbtcToBtc = fromCurrency === 'xbtc' && toCurrency === 'btc';
-  const isLiteforgeMode = fromNetwork === 'liteforge';
 
   return (
     <div
-      className={`flex flex-col items-center bg-[#100D16] w-full sm:w-[400px] md:w-[440px] h-[${
-        toCurrency === 'btc' ? '506px' : '414px'
-      }] py-5 px-4 rounded-xl transition-all duration-300 ease-in-out`}
+      className={`flex flex-col items-center bg-[#100D16] w-full sm:w-[400px] md:w-[440px] py-5 px-4 rounded-xl transition-all duration-300 ease-in-out`}
     >
+      {/* Direction selector */}
+      <div className="flex w-full gap-2 mb-5">
+        <button
+          type="button"
+          onClick={() => onDirectionChange('ltc-to-liteforge')}
+          className={cn(
+            'flex-1 h-[42px] rounded-[10px] text-[13px] font-semibold transition-colors',
+            !isLiteforgeMode
+              ? 'bg-[#FFAA2E] text-black'
+              : 'bg-grey border border-input-border text-text-secondary hover:bg-gray-700'
+          )}
+        >
+          LTC → zkLTC
+        </button>
+        <button
+          type="button"
+          onClick={() => onDirectionChange('liteforge-to-ltc')}
+          className={cn(
+            'flex-1 h-[42px] rounded-[10px] text-[13px] font-semibold transition-colors',
+            isLiteforgeMode
+              ? 'bg-[#FFAA2E] text-black'
+              : 'bg-grey border border-input-border text-text-secondary hover:bg-gray-700'
+          )}
+        >
+          zkLTC → LTC
+        </button>
+      </div>
+
       <div
         className={`w-full transition-all duration-300 ease-in-out ${
           isAnimating
@@ -88,26 +105,9 @@ export function TransferForm({
         />
       </div>
 
-      {isLiteforgeMode ? (
-        <button
-          type="button"
-          onClick={onExitLiteforgeMode}
-          className="text-xs text-text-secondary hover:text-text-primary mt-3 mb-0 underline underline-offset-2 transition-colors"
-        >
-          ← Back to standard mode
-        </button>
-      ) : (
-        <div
-          className={`flex justify-center items-center bg-grey rounded-[10px] w-10 h-10 my-3 cursor-pointer hover:bg-gray-700 transition-colors`}
-          onClick={handleSwitchNetworks}
-        >
-          <img
-            src={switchArrows}
-            alt="Switch"
-            className="h-[13.846px] w-[15px]"
-          />
-        </div>
-      )}
+      <div className="flex justify-center items-center h-8 my-1">
+        <span className="text-text-secondary text-lg">↓</span>
+      </div>
 
       <div
         className={`w-full transition-all duration-300 ease-in-out ${
@@ -130,6 +130,7 @@ export function TransferForm({
         />
       </div>
 
+      {/* Ethereum sending address — only in LTC → Liteforge mode */}
       {!isLiteforgeMode && (
         <div
           className={cn(
@@ -157,86 +158,40 @@ export function TransferForm({
         </div>
       )}
 
-      {!isLiteforgeMode && fromNetwork === 'bitcoin' && (
-        <div
-          className={cn(
-            'flex flex-col gap-1.5 w-full mt-3 transition-all duration-300 ease-in-out',
-            isAnimating ? 'opacity-0' : 'opacity-100'
-          )}
+      {/* LTC receiving address — only needed when receiving LTC (Liteforge → LTC) */}
+      {isLiteforgeMode && <div
+        className={cn(
+          'flex flex-col gap-1.5 w-full mt-3 transition-all duration-300 ease-in-out',
+          isAnimating ? 'opacity-0' : 'opacity-100'
+        )}
+      >
+        <Label
+          htmlFor="bitcoin-address"
+          className="text-xs text-text-secondary font-bold flex flex-row gap-1"
         >
-          <Label className="text-xs text-text-secondary font-bold">
-            Destination chain
-          </Label>
-          <div className="flex gap-2">
-            {(Object.keys(TARGET_CHAIN_LABELS) as TargetChain[]).map((chain) => (
-              <button
-                key={chain}
-                type="button"
-                onClick={() => onTargetChainChange(chain)}
-                className={cn(
-                  'flex-1 h-[48px] rounded-[10px] text-[14px] font-medium transition-colors',
-                  targetChain === chain
-                    ? 'bg-[#FFAA2E] text-black'
-                    : 'bg-grey border border-input-border text-text-secondary hover:bg-gray-700'
-                )}
-              >
-                {TARGET_CHAIN_LABELS[chain]}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* LTC receiving address — shown for ethereum→bitcoin AND liteforge→bitcoin */}
-      {(toCurrency === 'btc' || isLiteforgeMode) && (
-        <div
-          className={cn(
-            'flex flex-col gap-1.5 w-full mt-3 transition-all duration-300 ease-in-out',
-            isAnimating ? 'opacity-0' : 'opacity-100'
-          )}
-        >
-          <Label
-            htmlFor="bitcoin-address"
-            className="text-xs text-text-secondary font-bold flex flex-row gap-1"
-          >
-            Litecoin receiving address
-            <InfoTooltip
-              message="Enter the P2WPKH Litecoin address where you want to receive your LTC."
-              position="top"
-            />
-          </Label>
-          <Input
-            id="bitcoin-address"
-            placeholder="Paste your Litecoin receiving address"
-            value={bitcoinAddress || ''}
-            onChange={(e) => setBitcoinAddress(e.target.value as Address)}
-            errorMessage={
-              bitcoinAddress && !bitcoinAddressValid
-                ? 'Invalid Litecoin address'
-                : undefined
-            }
-            className={cn(
-              bitcoinAddress &&
-                !bitcoinAddressValid &&
-                'border-red-400 focus-visible:ring-red-400'
-            )}
+          Litecoin receiving address
+          <InfoTooltip
+            message="Enter the P2WPKH Litecoin address where you want to receive your LTC."
+            position="top"
           />
-        </div>
-      )}
-
-      {/* Liteforge mode entry link — shown only in standard mode */}
-      {!isLiteforgeMode && (
-        <button
-          type="button"
-          onClick={onSelectLiteforgeMode}
+        </Label>
+        <Input
+          id="bitcoin-address"
+          placeholder="Paste your Litecoin receiving address"
+          value={bitcoinAddress || ''}
+          onChange={(e) => setBitcoinAddress(e.target.value as Address)}
+          errorMessage={
+            bitcoinAddress && !bitcoinAddressValid
+              ? 'Invalid Litecoin address'
+              : undefined
+          }
           className={cn(
-            'mt-3 text-xs text-text-secondary hover:text-[#FFAA2E] transition-colors underline underline-offset-2',
-            isAnimating ? 'opacity-0' : 'opacity-100'
+            bitcoinAddress &&
+              !bitcoinAddressValid &&
+              'border-red-400 focus-visible:ring-red-400'
           )}
-        >
-          Bridge from Liteforge → LTC
-        </button>
-      )}
+        />
+      </div>}
     </div>
   );
 }

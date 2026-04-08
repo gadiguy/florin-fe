@@ -13,6 +13,7 @@ import { StatusIcon } from '@/components/ui/status-icon';
 import { getExplorerUrl } from '@/lib/utils';
 import { Txhash } from './txhash';
 import { STATUS_LABEL } from '@/constants';
+import { TargetChain, ChainId } from '@/types/chains';
 
 interface DesktopTransactionRowProps {
   tx: TransactionNormalized;
@@ -20,6 +21,7 @@ interface DesktopTransactionRowProps {
     id: string;
     type: 'reservation' | 'position';
     txHash: string;
+    targetChain?: TargetChain;
   }) => void;
   setOpenTrackerDialog: (open: boolean) => void;
 }
@@ -37,6 +39,7 @@ export const DesktopTransactionRow = ({
       id: tx.type === 'reservation' ? tx.reservationId || '' : tx.positionId || '',
       type: tx.type,
       txHash: tx.contractRegistrationTxHash,
+      targetChain: tx.targetChain === ChainId.LiteforgeTestnet ? 'liteforge' : undefined,
     });
   };
 

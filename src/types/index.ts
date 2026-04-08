@@ -81,6 +81,7 @@ export type Reservation = {
   targetBlockHash?: string;
   originBlockNumber?: number;
   originBlockHash?: string;
+  liteforgeTxhash?: string;
 };
 
 export type EVMPosition = {
@@ -155,6 +156,7 @@ export type TransactionHistoryItem = {
   targetBlockHash?: string;
   targetTxConfirmations?: number;
   blockTimestamp?: string;
+  targetChain?: number;
 };
 
 export type TransactionHistory = TransactionHistoryItem[];

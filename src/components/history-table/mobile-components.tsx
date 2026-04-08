@@ -17,6 +17,7 @@ import { TransactionNormalized } from './transaction-history-adapter';
 import { StatusIcon } from '@/components/ui/status-icon';
 import { getExplorerUrl } from '@/lib/utils';
 import { Txhash } from './txhash';
+import { TargetChain, ChainId } from '@/types/chains';
 
 // Mobile Transaction Item using Accordion
 export const MobileTransactionItem = ({
@@ -31,6 +32,7 @@ export const MobileTransactionItem = ({
     id: string;
     type: 'reservation' | 'position';
     txHash: string;
+    targetChain?: TargetChain;
   }) => void;
   setOpenTrackerDialog?: (open: boolean) => void;
 }) => {
@@ -40,9 +42,10 @@ export const MobileTransactionItem = ({
     if (setOpenTrackerDialog && setTransactionToTrack) {
       setOpenTrackerDialog(true);
       setTransactionToTrack({
-        id: tx.contractRegistrationTxHash,
+        id: tx.type === 'reservation' ? tx.reservationId || '' : tx.positionId || '',
         type: tx.type === 'position' ? 'position' : 'reservation',
         txHash: tx.contractRegistrationTxHash,
+        targetChain: tx.targetChain === ChainId.LiteforgeTestnet ? 'liteforge' : undefined,
       });
     }
   };
