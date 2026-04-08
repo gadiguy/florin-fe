@@ -175,7 +175,7 @@ export function ReservationTracker({
               bitcoinAddress: bitcoinAddress,
               hash: txHash,
               targetTxhash: reservation?.targetTxhash,
-              reservationId: evmReservation.reservationId,
+              reservationId: reservationIdStr,
               ownerAddress: ownerAddress,
               tokenAddress: 'token adrress' as Address,
               finality: Finality.UNKNOWN,
