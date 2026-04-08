@@ -44,7 +44,9 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [bitcoinAddress, setBitcoinAddress] = useState<string | undefined>(undefined);
   const [estimatedGasFee, setEstimatedGasFee] = useState<number>(0);
-  const { isSupported } = useSupportedChains();
+  // isSupported from useSupportedChains is no longer used here;
+  // useChainForDirection handles chain validation per direction
+  useSupportedChains();
   const {
     reservePosition,
     loading: exchangeLoading,
@@ -235,18 +237,19 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
         />
       )}
       <div className="flex justify-center mt-5">
-        <ConnectButton
-          isWalletConnected={isWalletConnected}
-          isAnimating={isAnimating}
-          isSupported={isSupported}
-        />
-        {isWalletConnected && isSupported && (
+        {!isWalletConnected ? (
+          <ConnectButton
+            isWalletConnected={isWalletConnected}
+            isAnimating={isAnimating}
+            isSupported={true}
+          />
+        ) : (
           <Button
             onClick={!isCorrectChain ? () => switchToCorrectChain(isLiteforgeMode) : handleBridgeAndReset}
             isAnimating={isAnimating}
             variant="orange"
             size="custom"
-            disabled={isSwitching || (!isCorrectChain ? false : disabled)}
+            disabled={isSwitching || (isCorrectChain && disabled)}
             loading={loading || isSwitching}
           >
             {getButtonLabel()}
