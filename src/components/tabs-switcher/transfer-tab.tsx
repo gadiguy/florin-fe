@@ -6,18 +6,17 @@ import { ConnectButton } from './connect-button';
 import { Button } from '../ui/button';
 import { isValidBitcoinAddress } from '@/lib/utils';
 import { Network, Currency } from './types';
-import { useChainId, useSwitchChain } from 'wagmi';
+import { useChainId } from 'wagmi';
 import { Address, parseEther } from 'viem';
 import { useExchange } from '@/hooks/useExchange';
 import { useLiteforgeSwap } from '@/hooks/useLiteforgeSwap';
-import { ContractManager } from '@/services/ContractManager';
 import { Reservation } from '@/types';
 import { useMaxMinBtc } from '@/hooks/queries/useMaxMinBtc';
 import { useBitSnarkBalance } from '@/hooks/useBitSnarkBalance';
 import { useAccount } from 'wagmi';
 import { useSupportedChains } from '@/hooks/useSupportedChains';
 import { useToast } from '@/hooks/useToast';
-import { TargetChain, ChainId } from '@/types/chains';
+import { TargetChain } from '@/types/chains';
 import { CONTRACTS_ADDRESS } from '@/constants/contracts';
 
 interface TransferTabProps {
@@ -32,7 +31,6 @@ interface TransferTabProps {
 export function TransferTab({ onTransactionCreated }: TransferTabProps) {
   const { address } = useAccount();
   const chainId = useChainId();
-  const { switchChain } = useSwitchChain();
   const [isLiteforgeMode, setIsLiteforgeMode] = useState(false);
   const [fromNetwork, setFromNetwork] = useState<Network>('bitcoin');
   const [toNetwork, setToNetwork] = useState<Network>('liteforge');
@@ -139,9 +137,6 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
     const parsedAmount = parseEther(normalizedAmount);
 
     if (isLiteforgeMode) {
-      await switchChain({ chainId: ChainId.LiteforgeTestnet });
-      const cm = await ContractManager.getInstance();
-      await cm.reinitialize();
       const result = await liteforgeSwap({ ltcAddress: bitcoinAddress!, amount: parsedAmount });
       if (result) {
         onTransactionCreated('liteforge-swap', result.txHash, result.txHash);

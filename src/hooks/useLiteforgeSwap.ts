@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { ContractManager } from '@/services/ContractManager';
+import { writeContract, waitForTransactionReceipt, switchChain, getAccount } from '@wagmi/core';
+import { wagmiConfig } from '@/config/wagmi';
 import { CONTRACTS_ADDRESS } from '@/constants/contracts';
+import { LITEFORGE_SWAP_ABI } from '@/constants/abis';
 import { ChainId } from '@/types/chains';
 import { bech32ToBytes32 } from '@/lib/utils';
+import { liteforgeTestnet } from '@/config/evm-chains';
 
 function parseContractError(error: unknown): string {
   const message = (error as Error)?.message ?? '';
@@ -34,15 +37,23 @@ export const useLiteforgeSwap = () => {
       const contractAddress = (contracts as { liteforgeSwap: string }).liteforgeSwap as `0x${string}`;
       const ltcAddressBytes32 = bech32ToBytes32(ltcAddress);
 
-      const contractManager = await ContractManager.getInstance();
-      const { hash, wait } = await contractManager.writeContract(
-        'LiteforgeSwap',
-        'swap',
-        [ltcAddressBytes32],
-        contractAddress,
-        { value: amount }
-      );
-      await wait();
+      // Ensure we're on Liteforge chain
+      const account = getAccount(wagmiConfig);
+      if (account.chainId !== ChainId.LiteforgeTestnet) {
+        await switchChain(wagmiConfig, { chainId: ChainId.LiteforgeTestnet });
+      }
+
+      const hash = await writeContract(wagmiConfig, {
+        chain: liteforgeTestnet,
+        address: contractAddress,
+        abi: [...LITEFORGE_SWAP_ABI],
+        functionName: 'swap',
+        args: [ltcAddressBytes32],
+        value: amount,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+
+      await waitForTransactionReceipt(wagmiConfig, { hash, confirmations: 1 });
 
       setLoading(false);
       return { txHash: hash };
