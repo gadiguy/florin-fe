@@ -157,6 +157,7 @@ export type TransactionHistoryItem = {
   targetTxConfirmations?: number;
   blockTimestamp?: string;
   targetChain?: number;
+  liteforgeTxhash?: string;
 };
 
 export type TransactionHistory = TransactionHistoryItem[];

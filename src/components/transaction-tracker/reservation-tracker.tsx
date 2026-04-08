@@ -42,7 +42,6 @@ export function ReservationTracker({
   const { data: litecoinPrice } = useLitecoinPrice();
   const reservation = data?.data;
 
-  // Always poll on Sepolia — reservations live there regardless of current wallet chain
   const { evmReservation } =
     useEVMReservationPolling({
       reservationId: id || '',
@@ -50,9 +49,7 @@ export function ReservationTracker({
       isActive: shouldPoll,
     });
 
-  const amount = evmReservation
-    ? formatUnits(evmReservation.tokenAmount || 0n, 18)
-    : reservation?.amount || '0';
+  const amount = formatUnits(evmReservation?.tokenAmount || 0n, 18);
   const xltcAmount = amount;
 
   const fiatAmount = useMemo(() => {

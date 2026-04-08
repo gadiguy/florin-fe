@@ -5,9 +5,10 @@ import {
   ReservationStatus,
 } from '@/types';
 import { formatUnits } from 'viem';
+import { ChainId } from '@/types/chains';
 
 export type TransactionType = 'position' | 'reservation';
-export type ChainType = 'Litecoin' | 'Ethereum';
+export type ChainType = 'Litecoin' | 'Ethereum' | 'Liteforge';
 
 export interface TransactionNormalized {
   type: TransactionType;
@@ -90,7 +91,9 @@ export function transactionHistoryAdapter(
     ...item,
     type: type,
     fromChain: !item.reservationId ? 'Ethereum' : 'Litecoin',
-    toChain: !item.reservationId ? 'Litecoin' : 'Ethereum',
+    toChain: !item.reservationId ? 'Litecoin'
+      : item.targetChain === ChainId.LiteforgeTestnet || item.liteforgeTxhash ? 'Liteforge'
+      : 'Ethereum',
     positionId: item.positionId,
     reservationId: item.reservationId,
     chainId: item.registrationChain,

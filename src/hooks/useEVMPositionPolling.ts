@@ -1,5 +1,28 @@
 import { useQuery } from '@tanstack/react-query';
-import { useExchange } from './useExchange';
+import { createPublicClient, http, Address } from 'viem';
+import { sepolia } from '@/config/evm-chains';
+import { CONTRACTS_ADDRESS } from '@/constants/contracts';
+import { AMMEXCHANGE_ABI } from '@/constants/abis';
+import { EVMPosition } from '@/types';
+
+// Standalone Sepolia client — no wallet needed
+const sepoliaClient = createPublicClient({
+  chain: sepolia,
+  transport: http(sepolia.rpcUrls.default.http[0]),
+});
+
+async function fetchPosition(positionId: string): Promise<EVMPosition> {
+  const contractAddress = (CONTRACTS_ADDRESS[sepolia.id] as { ammExchange: string }).ammExchange as Address;
+
+  const position = (await sepoliaClient.readContract({
+    address: contractAddress,
+    abi: AMMEXCHANGE_ABI,
+    functionName: 'getPosition',
+    args: [positionId],
+  })) as unknown as EVMPosition;
+
+  return position;
+}
 
 interface UseEVMPositionPollingProps {
   positionId: string;
@@ -10,16 +33,15 @@ interface UseEVMPositionPollingProps {
 
 export const useEVMPositionPolling = ({
   positionId,
-  chainId,
   isActive = true,
   pollingInterval = 10000,
 }: UseEVMPositionPollingProps) => {
-  const { getPosition } = useExchange();
-  const queryKey = ['evmPosition', positionId, chainId];
+  const queryKey = ['evmPosition', positionId];
+
   const { data: evmPosition, error, isLoading, refetch } = useQuery({
     queryKey,
-    queryFn: () => getPosition({ positionId, chainId }),
-    enabled: !!positionId && !!chainId,
+    queryFn: () => fetchPosition(positionId),
+    enabled: !!positionId,
     refetchInterval: isActive ? pollingInterval : false,
     refetchIntervalInBackground: false,
     staleTime: 0,
@@ -32,4 +54,4 @@ export const useEVMPositionPolling = ({
     isLoading,
     refetch,
   };
-}; 
+};

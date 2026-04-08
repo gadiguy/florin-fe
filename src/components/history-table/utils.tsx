@@ -14,6 +14,8 @@ export function getChainLogo(chain: string): string | undefined {
       return litecoinLogo;
     case 'ethereum':
       return ethLogo;
+    case 'liteforge':
+      return ethLogo;
     default:
       return undefined;
   }
