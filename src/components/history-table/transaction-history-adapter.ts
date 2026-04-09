@@ -5,10 +5,9 @@ import {
   ReservationStatus,
 } from '@/types';
 import { formatUnits } from 'viem';
-import { ChainId } from '@/types/chains';
 
-export type TransactionType = 'position' | 'reservation';
-export type ChainType = 'Litecoin' | 'Ethereum' | 'Liteforge';
+export type TransactionType = 'position' | 'reservation' | 'liteforge_swap';
+export type ChainType = 'Litecoin' | 'Ethereum' | 'LiteForge';
 
 export interface TransactionNormalized {
   type: TransactionType;
@@ -65,6 +64,20 @@ export function parseBigIntString(value: string): bigint {
   return BigInt(value);
 }
 
+function getFromToChains(type: TransactionType, item: TransactionHistoryItem): { fromChain: ChainType; toChain: ChainType } {
+  switch (type) {
+    case 'position':
+      return { fromChain: 'Ethereum', toChain: 'Litecoin' };
+    case 'liteforge_swap':
+      return { fromChain: 'LiteForge', toChain: 'Litecoin' };
+    case 'reservation':
+      return {
+        fromChain: 'Litecoin',
+        toChain: item.liteforgeTxhash ? 'LiteForge' : 'Ethereum',
+      };
+  }
+}
+
 /**
  * Transforms a TransactionHistoryItem into a TransactionResponse object
  * This adapter ensures compatibility with the existing table component
@@ -72,36 +85,37 @@ export function parseBigIntString(value: string): bigint {
 export function transactionHistoryAdapter(
   item: TransactionHistoryItem
 ): TransactionNormalized {
-  const type = !item.reservationId ? 'position' : 'reservation';
+  // Use transactionType from BE if available, otherwise infer
+  const type: TransactionType = item.transactionType || (!item.reservationId ? 'position' : 'reservation');
 
   // Parse amount properly if it's in the bigint string format
   const originalAmountToUse = parseBigIntString(
     item.originalAmount || (item.amount as string)
   );
 
-  const createdAtDate = item.blockTimestamp 
+  const createdAtDate = item.blockTimestamp
     ? new Date(parseInt(item.blockTimestamp) * 1000) // Convert seconds to milliseconds
     : new Date();
 
-    const state = type === 'position'
+  const state = type === 'position'
     ? POSITION_STATUS_MAP[item.state ?? 1]
-    : item.targetTxhash ? ReservationStatus.Settled : RESERVATION_STATUS_MAP[item.state || 1]
+    : item.targetTxhash ? ReservationStatus.Settled : RESERVATION_STATUS_MAP[item.state || 1];
+
+  const { fromChain, toChain } = getFromToChains(type, item);
 
   return {
     ...item,
-    type: type,
-    fromChain: !item.reservationId ? 'Ethereum' : 'Litecoin',
-    toChain: !item.reservationId ? 'Litecoin'
-      : item.targetChain === ChainId.LiteforgeTestnet || item.liteforgeTxhash ? 'Liteforge'
-      : 'Ethereum',
+    type,
+    fromChain,
+    toChain,
     positionId: item.positionId,
     reservationId: item.reservationId,
     chainId: item.registrationChain,
     ownerAddress: item.ownerAddress,
     tokenAddress: item.tokenAddress as `0x${string}`,
     bitcoinAddress: item.bitcoinAddress,
-    exchangeRate: '1', // Not available in new API
-    state: state,
+    exchangeRate: '1',
+    state,
     registrationFinality:
       item.registrationFinality === 'FINAL' ? Finality.FINAL : Finality.UNKNOWN,
     amount: formatUnits(originalAmountToUse, 18) || '0',
@@ -109,7 +123,7 @@ export function transactionHistoryAdapter(
     receivedAmount: formatUnits(originalAmountToUse, 18) || '0',
     blockNumber: item.registrationBlockNumber,
     blockHash: item.registrationBlockHash,
-    createdAt: createdAtDate.toISOString(), // Not available in new API, using current time
+    createdAt: createdAtDate.toISOString(),
     contractRegistrationTxHash: item.registrationTxhash,
     originTxHash: item.originTxhash,
     targetTxhash: item.targetTxhash || '',

@@ -13,13 +13,13 @@ import { StatusIcon } from '@/components/ui/status-icon';
 import { getExplorerUrl } from '@/lib/utils';
 import { Txhash } from './txhash';
 import { STATUS_LABEL } from '@/constants';
-import { TargetChain, ChainId } from '@/types/chains';
+import { TargetChain } from '@/types/chains';
 
 interface DesktopTransactionRowProps {
   tx: TransactionNormalized;
   setTransactionToTrack: (tx: {
     id: string;
-    type: 'reservation' | 'position';
+    type: 'reservation' | 'position' | 'liteforge-swap';
     txHash: string;
     targetChain?: TargetChain;
   }) => void;
@@ -35,11 +35,17 @@ export const DesktopTransactionRow = ({
 
   const handleOpenTrackerDialog = () => {
     setOpenTrackerDialog(true);
+    const trackerType = tx.type === 'liteforge_swap' ? 'liteforge-swap' as const
+      : tx.type === 'reservation' ? 'reservation' as const
+      : 'position' as const;
+    const id = tx.type === 'liteforge_swap' ? tx.contractRegistrationTxHash
+      : tx.type === 'reservation' ? tx.reservationId || ''
+      : tx.positionId || '';
     setTransactionToTrack({
-      id: tx.type === 'reservation' ? tx.reservationId || '' : tx.positionId || '',
-      type: tx.type,
+      id,
+      type: trackerType,
       txHash: tx.contractRegistrationTxHash,
-      targetChain: tx.targetChain === ChainId.LiteforgeTestnet ? 'liteforge' : undefined,
+      targetChain: tx.toChain === 'LiteForge' ? 'liteforge' : undefined,
     });
   };
 
@@ -75,11 +81,11 @@ export const DesktopTransactionRow = ({
         />
       </TableCell>
       <TableCell className="text-end pr-2 text-xs border-t border-b border-[#333845] bg-[#1D1F25] py-3 px-2 whitespace-nowrap" data-testid="requested-amount">
-        {tx.amount} {tx.type === 'position' ? 'zkLTC' : 'LTC'}
+        {tx.amount} {tx.type === 'position' ? 'zkLTC' : tx.type === 'liteforge_swap' ? 'zkLTC' : 'LTC'}
       </TableCell>
       <TableCell className="text-end pr-2 text-xs border-t border-b border-[#333845] bg-[#1D1F25] py-3 px-2 whitespace-nowrap" data-testid="received-amount">
         {formatReceivedAmount(tx.amount || tx?.originalAmount || '0', data?.minAmount)}{' '}
-        {tx.type === 'position' ? 'LTC' : 'zkLTC'}
+        {tx.type === 'position' ? 'LTC' : tx.type === 'liteforge_swap' ? 'LTC' : 'zkLTC'}
       </TableCell>
       <TableCell className="text-[#FFAA2E] pl-2 text-xs border-t border-b border-[#333845] bg-[#1D1F25] py-3 px-2 whitespace-nowrap cursor-pointer">
         <Txhash

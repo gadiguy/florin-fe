@@ -62,7 +62,7 @@ export const localhost = defineChain({
 // TODO: update RPC/explorer URLs once liteforge-swap-deployment.json is available
 export const liteforgeTestnet = createChain(
   ChainId.LiteforgeTestnet,
-  'Liteforge',
+  'LiteForge',
   'ETH',
   'https://liteforge.rpc.caldera.xyz/http',
   'https://liteforge.explorer.caldera.xyz',

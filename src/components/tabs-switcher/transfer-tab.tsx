@@ -19,6 +19,8 @@ import { useSupportedChains } from '@/hooks/useSupportedChains';
 import { useToast } from '@/hooks/useToast';
 import { TargetChain } from '@/types/chains';
 import { CONTRACTS_ADDRESS } from '@/constants/contracts';
+import { FlorinApiService } from '@/services/Api';
+import { ChainId } from '@/types/chains';
 
 interface TransferTabProps {
   onTransactionCreated: (
@@ -148,6 +150,12 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
     if (isLiteforgeMode) {
       const result = await liteforgeSwap({ ltcAddress: bitcoinAddress!, amount: parsedAmount });
       if (result) {
+        FlorinApiService.reportTransaction({
+          txHash: result.txHash,
+          userAddress: address!,
+          type: 'liteforge_swap',
+          chainId: ChainId.LiteforgeTestnet,
+        });
         onTransactionCreated('liteforge-swap', result.txHash, result.txHash);
       }
       return;
@@ -166,6 +174,12 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
     });
 
     if (transaction) {
+      FlorinApiService.reportTransaction({
+        txHash: transaction.hash,
+        userAddress: address!,
+        type: 'reservation',
+        chainId,
+      });
       onTransactionCreated(
         'reservation',
         (transaction as Reservation).reservationId,
@@ -196,7 +210,7 @@ export function TransferTab({ onTransactionCreated }: TransferTabProps) {
   const getButtonLabel = () => {
     if (isSwitching) return 'Switching network...';
     if (!isCorrectChain) return 'Switch network';
-    return isLiteforgeMode ? 'Swap to LTC' : 'Bridge to Liteforge';
+    return isLiteforgeMode ? 'Swap to LTC' : 'Bridge to LiteForge';
   };
 
   return (

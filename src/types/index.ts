@@ -133,6 +133,7 @@ export interface TransactionResponse {
 
 
 export type TransactionHistoryItem = {
+  transactionType?: 'position' | 'reservation' | 'liteforge_swap';
   positionId: string;
   reservationId?: string;
   amount: string;

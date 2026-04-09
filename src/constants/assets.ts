@@ -27,5 +27,5 @@ export const CURRENCY_SYMBOLS = {
 export const NETWORK_NAMES = {
   bitcoin: 'Litecoin',
   ethereum: 'Ethereum',
-  liteforge: 'Liteforge',
+  liteforge: 'LiteForge',
 };
