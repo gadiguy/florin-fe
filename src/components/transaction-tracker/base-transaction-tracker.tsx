@@ -14,6 +14,7 @@ interface BaseTransactionTrackerProps {
   maxHeight?: string;
   positionId?: string;
   reservationId?: string;
+  reservationIdLabel?: string;
 }
 
 function IdRow({ label, value }: { label: string; value: string }) {
@@ -55,6 +56,7 @@ export function BaseTransactionTracker({
   maxHeight = 'max-h-[90vh]',
   positionId,
   reservationId,
+  reservationIdLabel = 'Reservation ID',
 }: BaseTransactionTrackerProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -64,7 +66,7 @@ export function BaseTransactionTracker({
         <div className="flex flex-col gap-1">
           <h3 className="font-semibold text-base">{title}</h3>
           {positionId && <IdRow label="Position ID" value={positionId} />}
-          {reservationId && <IdRow label="Reservation ID" value={reservationId} />}
+          {reservationId && <IdRow label={reservationIdLabel} value={reservationId} />}
         </div>
         {isLoading ? (
           <TrackerSkeleton />

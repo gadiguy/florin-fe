@@ -237,15 +237,15 @@ export function ReservationTracker({
           {isLiteforge && (
             <>
               <TransactionStep
-                title="Bridging to Liteforge"
-                description="zkLTC is being sent to Liteforge via the native bridge."
+                title="Bridging to LiteForge"
+                description="zkLTC is being sent to LiteForge via the native bridge."
                 status={liteforgeArrived ? 'completed' : bridgingCompleted ? 'current' : 'pending'}
                 completed={liteforgeArrived}
               />
 
               <TransactionStep
-                title="Arrived on Liteforge"
-                description="Your zkLTC has arrived at your address on Liteforge."
+                title="Arrived on LiteForge"
+                description="Your zkLTC has arrived at your address on LiteForge."
                 status={liteforgeArrived ? 'completed' : 'pending'}
                 isLastStep={true}
                 completed={liteforgeArrived}

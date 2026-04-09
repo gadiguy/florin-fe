@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import litecoinLogo from '@/assets/litecoin-logo.png';
 import ethLogo from '@/assets/eth-logo.png';
+import zkLtcLogo from '/zkLTC-logo.svg';
 
 // Formatter for hash display
 export function formatHash(hash: string = '') {
@@ -15,7 +16,7 @@ export function getChainLogo(chain: string): string | undefined {
     case 'ethereum':
       return ethLogo;
     case 'liteforge':
-      return ethLogo;
+      return zkLtcLogo;
     default:
       return undefined;
   }

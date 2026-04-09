@@ -17,7 +17,7 @@ import { TransactionNormalized } from './transaction-history-adapter';
 import { StatusIcon } from '@/components/ui/status-icon';
 import { getExplorerUrl } from '@/lib/utils';
 import { Txhash } from './txhash';
-import { TargetChain, ChainId } from '@/types/chains';
+import { TargetChain } from '@/types/chains';
 
 // Mobile Transaction Item using Accordion
 export const MobileTransactionItem = ({
@@ -30,7 +30,7 @@ export const MobileTransactionItem = ({
   index: number;
   setTransactionToTrack?: (tx: {
     id: string;
-    type: 'reservation' | 'position';
+    type: 'reservation' | 'position' | 'liteforge-swap';
     txHash: string;
     targetChain?: TargetChain;
   }) => void;
@@ -41,11 +41,17 @@ export const MobileTransactionItem = ({
   const handleOpenTrackerDialog = () => {
     if (setOpenTrackerDialog && setTransactionToTrack) {
       setOpenTrackerDialog(true);
+      const trackerType = tx.type === 'liteforge_swap' ? 'liteforge-swap' as const
+        : tx.type === 'reservation' ? 'reservation' as const
+        : 'position' as const;
+      const id = tx.type === 'liteforge_swap' ? tx.contractRegistrationTxHash
+        : tx.type === 'reservation' ? tx.reservationId || ''
+        : tx.positionId || '';
       setTransactionToTrack({
-        id: tx.type === 'reservation' ? tx.reservationId || '' : tx.positionId || '',
-        type: tx.type === 'position' ? 'position' : 'reservation',
+        id,
+        type: trackerType,
         txHash: tx.contractRegistrationTxHash,
-        targetChain: tx.targetChain === ChainId.LiteforgeTestnet ? 'liteforge' : undefined,
+        targetChain: tx.toChain === 'LiteForge' ? 'liteforge' : undefined,
       });
     }
   };
@@ -71,7 +77,7 @@ export const MobileTransactionItem = ({
 
         <div className="flex items-center gap-3">
           <div className="text-sm font-medium text-right">
-            <span className="text-white">{tx.amount}</span> {tx.type === 'position' ? 'zkLTC' : 'LTC'}
+            <span className="text-white">{tx.amount}</span> {tx.type === 'position' || tx.type === 'liteforge_swap' ? 'zkLTC' : 'LTC'}
           </div>
         </div>
       </AccordionTrigger>
@@ -93,7 +99,7 @@ export const MobileTransactionItem = ({
           <div className="grid grid-cols-2 items-center">
             <span className="text-sm">Requested amount</span>
             <span className="text-sm text-right">
-              {tx.amount} {tx.type === 'position' ? 'zkLTC' : 'LTC'}
+              {tx.amount} {tx.type === 'position' || tx.type === 'liteforge_swap' ? 'zkLTC' : 'LTC'}
             </span>
           </div>
 
@@ -101,7 +107,7 @@ export const MobileTransactionItem = ({
             <span className="text-sm">Received amount</span>
             <span className="text-sm text-right">
               {formatReceivedAmount(tx.receivedAmount, data?.minAmount)}{' '}
-              {tx.type === 'position' ? 'LTC' : 'zkLTC'}
+              {tx.type === 'position' || tx.type === 'liteforge_swap' ? 'LTC' : 'zkLTC'}
             </span>
           </div>
 

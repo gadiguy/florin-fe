@@ -42,7 +42,7 @@ export default function TransactionsTable() {
   const { data: transactions, isLoading } = useTransactions(address);
   const [transactionToTrack, setTransactionToTrack] = useState<{
     id: string;
-    type: 'reservation' | 'position';
+    type: 'reservation' | 'position' | 'liteforge-swap';
     txHash: string;
     targetChain?: TargetChain;
   } | null>(null);

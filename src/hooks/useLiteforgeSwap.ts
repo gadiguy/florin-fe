@@ -38,7 +38,7 @@ export const useLiteforgeSwap = () => {
       const contractAddress = (contracts as { liteforgeSwap: string }).liteforgeSwap as `0x${string}`;
       const ltcAddressBytes32 = bech32ToBytes32(ltcAddress);
 
-      // Wallet should already be on Liteforge (switched by direction selector)
+      // Wallet should already be on LiteForge (switched by direction selector)
       const connectorClient = await getConnectorClient(wagmiConfig);
       const walletClient = createWalletClient({
         account: connectorClient.account,

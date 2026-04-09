@@ -129,6 +129,23 @@ export class FlorinApiService {
     return response.json();
   }
 
+  static async reportTransaction(params: {
+    txHash: string;
+    userAddress: string;
+    type: 'position' | 'reservation' | 'liteforge_swap';
+    chainId: number;
+  }): Promise<void> {
+    try {
+      await fetch(`${API_BASE_URL}/transaction`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      });
+    } catch (err) {
+      console.error('Failed to report transaction:', err);
+    }
+  }
+
   static async getLiteforgeSwap(txHash: string): Promise<LiteforgeSwap | null> {
     if (!txHash) return null;
     const response = await fetch(`${API_BASE_URL}/liteforge-swap/${txHash}`);

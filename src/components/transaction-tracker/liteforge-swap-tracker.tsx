@@ -9,7 +9,7 @@ import { EthTransactionCard } from './eth-transaction-card';
 import { env } from '@/config/env';
 import { formatUnits } from 'viem';
 
-interface LiteforgeSwapTrackerProps {
+interface LiteForgeSwapTrackerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   txHash: string;
@@ -19,7 +19,7 @@ export function LiteforgeSwapTracker({
   open,
   onOpenChange,
   txHash,
-}: LiteforgeSwapTrackerProps) {
+}: LiteForgeSwapTrackerProps) {
   const [shouldPoll, setShouldPoll] = useState(open);
 
   const { data: swapData } = useQuery({
@@ -54,12 +54,14 @@ export function LiteforgeSwapTracker({
       isLoading={false}
       error={null}
       maxHeight={maxHeightClass}
-      title="Liteforge → LTC"
+      title="LiteForge → LTC"
+      reservationId={txHash}
+      reservationIdLabel="TX Hash"
     >
-      {/* Step 1 — Swap initiated on Liteforge */}
+      {/* Step 1 — Swap initiated on LiteForge */}
       <TransactionStep
         title="Swap initiated"
-        description="Your swap transaction was confirmed on Liteforge."
+        description="Your swap transaction was confirmed on LiteForge."
         status="completed"
         completed={true}
         isStepOne={true}
