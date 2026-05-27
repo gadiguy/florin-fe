@@ -13,6 +13,9 @@ export function FeeCard({ toCurrency, isAnimating, amount, gasFee }: FeeCardProp
   const amountNumber = parseFloat(amount) || 0;
   const receiveAmount = Math.max(0, amountNumber).toFixed(6);
 
+  // When the relayer is active users pay no ETH gas; hide the network fee row.
+  const relayerActive = !!import.meta.env.VITE_RELAYER_URL;
+
   return (
     <Card
       className={cn(
@@ -34,17 +37,19 @@ export function FeeCard({ toCurrency, isAnimating, amount, gasFee }: FeeCardProp
             {receiveAmount} {toCurrency === 'btc' ? 'BTC' : 'zkLTC'}
           </div>
         </div>
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-1 text-text-secondary text-[13px]">
-            Network fee
-            <InfoTooltip
-              message="The cost of gas to fund your transaction, paid in ETH. This fee may vary, and is estimated at the moment of your transaction."
-              position="top"
-              align="center"
-            />
+        {!relayerActive && (
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-1 text-text-secondary text-[13px]">
+              Network fee
+              <InfoTooltip
+                message="The cost of gas to fund your transaction, paid in ETH. This fee may vary, and is estimated at the moment of your transaction."
+                position="top"
+                align="center"
+              />
+            </div>
+            <div className="text-white text-right text-[13px]">~{gasFee} ETH</div>
           </div>
-          <div className="text-white text-right text-[13px]">~{gasFee} ETH</div>
-        </div>
+        )}
         <div className="flex justify-between items-center">
           <div className="text-text-secondary text-[13px]">Bridge fee</div>
           <div className="text-white text-right text-[13px]">free</div>

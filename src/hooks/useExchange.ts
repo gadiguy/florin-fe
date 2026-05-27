@@ -14,6 +14,7 @@ import { CONTRACTS_ADDRESS } from '@/constants/contracts';
 import { ContractManager } from '@/services/ContractManager';
 import { bech32ToBytes32, bytes32ToBech32Taproot } from '@/lib/utils';
 import { AMMEXCHANGE_ABI } from '@/constants/abis';
+import { useRelayedReservePosition } from './useRelayedReservePosition';
 
 function parseContractError(error: unknown): string {
   const message = (error as Error)?.message ?? '';
@@ -33,6 +34,7 @@ function parseContractError(error: unknown): string {
 export const useExchange = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { relay: relayReservePosition } = useRelayedReservePosition();
 
   const estimateOpenPositionGas = async (): Promise<number> => {
     try {
@@ -152,17 +154,17 @@ export const useExchange = () => {
         nonce,
         deadline,
       };
-      
+
       const signature = await contractManager.signTypedData({
         domain,
         types,
         primaryType: 'Permit',
         message,
       });
-      
+
       const { r, s, v } = contractManager.getRSV(signature);
       const bytes32 = bech32ToBytes32(bitcoinAddresses);
-      
+
       const { hash, wait } = await contractManager.writeContract(
         'AMMExchange',
         'openPosition',
@@ -225,58 +227,97 @@ export const useExchange = () => {
       setLoading(true);
       setError(null);
 
-      const contractManager = await ContractManager.getInstance();
       const tokenAddress = CONTRACTS_ADDRESS[
         chainId as keyof typeof CONTRACTS_ADDRESS
       ].erc20BitSnark as Address;
 
       const positionId = CONTRACTS_ADDRESS[chainId as keyof typeof CONTRACTS_ADDRESS].defaultPositionId;
-      const contractAddress = CONTRACTS_ADDRESS[
-        chainId as keyof typeof CONTRACTS_ADDRESS
-      ].ammExchange as Address;
 
-      const { hash, wait } = await contractManager.writeContract(
-        'AMMExchange',
-        'reservePosition',
-        [positionId, evmReceivingAddress, tokenAmount],
-        contractAddress,
-        { value: 0n }
-      );
-      const receipt = await wait();
+      const relayerUrl = import.meta.env.VITE_RELAYER_URL as string | undefined;
 
-      const transaction = {
-        hash: hash,
-        contractRegistrationTxHash: hash,
-        blockHash: receipt.receipt?.blockHash,
-        blockNumber: receipt.receipt?.blockNumber,
-        status: TransactionStatus.Completed,
-        receivedAmount: '0',
-      };
+      if (relayerUrl) {
+        // --- Meta-transaction path (gas-free for user) ---
+        // Errors from the relayer propagate directly; no ETH fallback.
+        const { txHash } = await relayReservePosition({
+          evmReceivingAddress,
+          tokenAmount,
+          chainId,
+        });
 
-      console.log('[reservePosition] receipt.logs:', receipt?.logs);
-      console.log('[reservePosition] receipt.receipt.logs:', receipt?.receipt?.logs);
-      const reservationId = receipt?.logs
-        ? receipt.logs.find((l: { args?: { reservationId?: string } }) => l.args?.reservationId)?.args?.reservationId
-        : '';
-      console.log('[reservePosition] extracted reservationId:', reservationId);
-      if (!reservationId) {
-        throw new Error('Reservation ID not found in receipt logs');
+        // The relayer returns txHash after 2 confirmations.
+        // reservationId will be populated by the existing polling hooks
+        // (useReservation / useEVMReservationPolling) once the tx is mined.
+        const newReservation: Reservation = {
+          positionId: positionId,
+          reservationId: '', // Populated by polling hooks
+          ownerAddress: owner,
+          amount: tokenAmount.toString(),
+          tokenAddress: tokenAddress,
+          state: ReservationStatus.Pending,
+          finality: Finality.FINAL,
+          chainId: chainId,
+          hash: txHash,
+          contractRegistrationTxHash: txHash,
+          blockHash: '',
+          blockNumber: undefined,
+          status: TransactionStatus.Pending,
+          createdAt: new Date().toISOString(),
+          receivedAmount: '0',
+        };
+
+        setLoading(false);
+        return newReservation;
+
+      } else {
+        // --- Direct on-chain path (user pays ETH gas) ---
+        const contractAddress = CONTRACTS_ADDRESS[
+          chainId as keyof typeof CONTRACTS_ADDRESS
+        ].ammExchange as Address;
+
+        const contractManager = await ContractManager.getInstance();
+        const { hash, wait } = await contractManager.writeContract(
+          'AMMExchange',
+          'reservePosition',
+          [positionId, evmReceivingAddress, tokenAmount],
+          contractAddress,
+          { value: 0n }
+        );
+        const receipt = await wait();
+
+        const transaction = {
+          hash: hash,
+          contractRegistrationTxHash: hash,
+          blockHash: receipt.receipt?.blockHash,
+          blockNumber: receipt.receipt?.blockNumber,
+          status: TransactionStatus.Completed,
+          receivedAmount: '0',
+        };
+
+        console.log('[reservePosition] receipt.logs:', receipt?.logs);
+        console.log('[reservePosition] receipt.receipt.logs:', receipt?.receipt?.logs);
+        const reservationId = receipt?.logs
+          ? receipt.logs.find((l: { args?: { reservationId?: string } }) => l.args?.reservationId)?.args?.reservationId
+          : '';
+        console.log('[reservePosition] extracted reservationId:', reservationId);
+        if (!reservationId) {
+          throw new Error('Reservation ID not found in receipt logs');
+        }
+        const newReservation: Reservation = {
+          positionId: positionId,
+          reservationId: reservationId,
+          ownerAddress: owner,
+          amount: tokenAmount.toString(),
+          tokenAddress: tokenAddress,
+          state: ReservationStatus.Pending,
+          finality: Finality.FINAL,
+          chainId: chainId,
+          ...transaction,
+          createdAt: new Date().toISOString(),
+        };
+
+        setLoading(false);
+        return newReservation;
       }
-      const newReservation: Reservation = {
-        positionId: positionId,
-        reservationId: reservationId,
-        ownerAddress: owner,
-        amount: tokenAmount.toString(),
-        tokenAddress: tokenAddress,
-        state: ReservationStatus.Pending,
-        finality: Finality.FINAL,
-        chainId: chainId,
-        ...transaction,
-        createdAt: new Date().toISOString(),
-      };
-
-      setLoading(false);
-      return newReservation;
     } catch (error) {
       setLoading(false);
       setError(parseContractError(error));
