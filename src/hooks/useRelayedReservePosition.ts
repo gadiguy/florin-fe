@@ -115,13 +115,16 @@ export function useRelayedReservePosition() {
         message,
       });
 
-      // 6. POST to relayer — all bigints serialized as decimal strings
+      // 6. POST to relayer — all bigints serialized as decimal strings.
+      // nonce is signed-over but NOT sent in the body: the FlorinForwarder
+      // (OZ ERC2771Forwarder v5) ForwardRequestData struct has 7 fields, and
+      // the relayer schema rejects additional properties. The forwarder reads
+      // nonces[from] from storage at execute time.
       const body = {
         from: message.from,
         to: message.to,
         value: message.value.toString(),
         gas: message.gas.toString(),
-        nonce: message.nonce.toString(),
         deadline: message.deadline.toString(),
         data: message.data,
         signature,
