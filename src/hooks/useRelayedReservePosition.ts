@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { useAccount, useSignTypedData, usePublicClient } from 'wagmi';
 import { CONTRACTS_ADDRESS } from '@/constants/contracts';
 import { AMMEXCHANGE_ABI, FORWARDER_ABI } from '@/constants/abis';
@@ -37,8 +36,13 @@ interface RelayResult {
   txHash: string;
 }
 
+// Module-scope single-flight: at most one in-flight relay per `from` address.
+// Second submit from the same address returns the in-flight Promise rather than
+// starting a duplicate transaction — handles both same-tab double-clicks and
+// cross-component concurrent calls.
+const inflightByFrom = new Map<string, Promise<RelayResult>>();
+
 export function useRelayedReservePosition() {
-  const isSubmittingRef = useRef(false);
   const { address: userAddress } = useAccount();
   const { signTypedDataAsync } = useSignTypedData();
   // usePublicClient with chainId narrows the returned client type; cast through
@@ -46,10 +50,6 @@ export function useRelayedReservePosition() {
   const publicClient = usePublicClient() as ReturnType<typeof usePublicClient> | undefined;
 
   const relay = async ({ evmReceivingAddress, tokenAmount, chainId }: RelayParams): Promise<RelayResult> => {
-    if (isSubmittingRef.current) {
-      throw new Error('A relay request is already in progress');
-    }
-
     const relayerUrl = import.meta.env.VITE_RELAYER_URL as string | undefined;
     if (!relayerUrl) {
       throw new Error('VITE_RELAYER_URL is not configured');
@@ -68,8 +68,14 @@ export function useRelayedReservePosition() {
       throw new Error('Public client not available');
     }
 
-    isSubmittingRef.current = true;
-    try {
+    // Return the existing in-flight Promise for this address rather than starting
+    // a duplicate — prevents double-submit on rapid clicks or concurrent callers.
+    const existing = inflightByFrom.get(userAddress);
+    if (existing) {
+      return existing;
+    }
+
+    const promise = (async (): Promise<RelayResult> => {
       // 1. Read nonce from FlorinForwarder
       const forwarderAddress = contracts.florinForwarder as Address;
       if (!forwarderAddress) {
@@ -201,10 +207,10 @@ export function useRelayedReservePosition() {
 
       const result = await response.json() as { txHash: string };
       return { txHash: result.txHash };
+    })().finally(() => inflightByFrom.delete(userAddress));
 
-    } finally {
-      isSubmittingRef.current = false;
-    }
+    inflightByFrom.set(userAddress, promise);
+    return promise;
   };
 
   return { relay };

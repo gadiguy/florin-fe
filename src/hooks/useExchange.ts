@@ -183,7 +183,7 @@ export const useExchange = () => {
       const transaction = {
         hash,
         contractRegistrationTxHash: hash,
-        blockHash: `0x${Math.random().toString(16).slice(2)}`,
+        blockHash: null,
         blockNumber: receipt.receipt?.blockNumber,
         status: TransactionStatus.Pending,
         createdAt: new Date().toISOString(),
@@ -293,12 +293,9 @@ export const useExchange = () => {
           receivedAmount: '0',
         };
 
-        console.log('[reservePosition] receipt.logs:', receipt?.logs);
-        console.log('[reservePosition] receipt.receipt.logs:', receipt?.receipt?.logs);
         const reservationId = receipt?.logs
           ? receipt.logs.find((l: { args?: { reservationId?: string } }) => l.args?.reservationId)?.args?.reservationId
           : '';
-        console.log('[reservePosition] extracted reservationId:', reservationId);
         if (!reservationId) {
           throw new Error('Reservation ID not found in receipt logs');
         }
