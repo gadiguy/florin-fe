@@ -5,6 +5,15 @@ import { AMMEXCHANGE_ABI, FORWARDER_ABI } from '@/constants/abis';
 import { encodeFunctionData } from 'viem';
 import type { Address } from 'viem';
 
+const ERC20_PREFLIGHT_ABI = [
+  { name: 'balanceOf', type: 'function', stateMutability: 'view',
+    inputs: [{ name: 'owner', type: 'address' }],
+    outputs: [{ name: '', type: 'uint256' }] },
+  { name: 'allowance', type: 'function', stateMutability: 'view',
+    inputs: [{ name: 'owner', type: 'address' }, { name: 'spender', type: 'address' }],
+    outputs: [{ name: '', type: 'uint256' }] },
+] as const;
+
 // EIP-712 types for FlorinForwarder (VERIFIED on Sepolia 2026-05-27)
 const FORWARD_REQUEST_TYPES = {
   ForwardRequest: [
@@ -74,6 +83,32 @@ export function useRelayedReservePosition() {
         args: [userAddress],
       })) as bigint;
 
+      // 1b. Pre-flight: zkLTC balance + AMM allowance before expensive signing.
+      // Mirrors the direct-path guard; fails fast without burning relayer quota.
+      const erc20Address = (contracts as { erc20BitSnark: Address }).erc20BitSnark;
+      const ammAddress = (contracts as { ammExchange: Address }).ammExchange as Address;
+      const [balance, allowance] = (await Promise.all([
+        publicClient.readContract({
+          address: erc20Address,
+          abi: ERC20_PREFLIGHT_ABI,
+          functionName: 'balanceOf',
+          args: [userAddress],
+        }),
+        publicClient.readContract({
+          address: erc20Address,
+          abi: ERC20_PREFLIGHT_ABI,
+          functionName: 'allowance',
+          args: [userAddress, ammAddress],
+        }),
+      ])) as [bigint, bigint];
+
+      if (balance < tokenAmount) {
+        throw new Error(`Insufficient token balance: have ${balance}, need ${tokenAmount}`);
+      }
+      if (allowance < tokenAmount) {
+        throw new Error(`Insufficient allowance for AMM: have ${allowance}, need ${tokenAmount}`);
+      }
+
       // 2. Encode reservePosition calldata
       const callData = encodeFunctionData({
         abi: AMMEXCHANGE_ABI,
@@ -84,6 +119,28 @@ export function useRelayedReservePosition() {
           tokenAmount,
         ],
       });
+
+      // 2b. Dynamic gas estimation via simulateContract (20% pad matches backend inner*1.1 check).
+      let gasEstimate = 300_000n; // safe fallback
+      try {
+        const sim = await publicClient.simulateContract({
+          address: ammAddress,
+          abi: AMMEXCHANGE_ABI,
+          functionName: 'reservePosition',
+          args: [
+            (contracts as { defaultPositionId: `0x${string}` }).defaultPositionId,
+            evmReceivingAddress,
+            tokenAmount,
+          ],
+          account: userAddress,
+        });
+        if (sim.request.gas) {
+          gasEstimate = (sim.request.gas * 120n) / 100n;
+        }
+      } catch {
+        // Simulation can fail if allowance wasn't approved or token reverts.
+        // Use fallback; backend will reject with 400 if gas is too low.
+      }
 
       // 3. Build EIP-712 domain
       const domain = {
@@ -102,7 +159,7 @@ export function useRelayedReservePosition() {
         from: userAddress,
         to: (contracts as { ammExchange: string }).ammExchange as Address,
         value: 0n,
-        gas: 300000n,
+        gas: gasEstimate,
         nonce,
         deadline,
         data: callData as `0x${string}`,

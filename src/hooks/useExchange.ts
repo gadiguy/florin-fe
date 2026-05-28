@@ -322,6 +322,7 @@ export const useExchange = () => {
       setLoading(false);
       setError(parseContractError(error));
       console.log('reservePosition error', error);
+      throw error;
     }
   };
 
